@@ -1,18 +1,18 @@
 # STATUS DO PROJETO MAESTRO
 **Data da Última Atualização:** 2025-12-12
-**Versão:** MVP 1.0 (Modular & UX Refined)
+**Versão:** v1.0.0 (MVP Feature Complete)
 
 ## 🚦 Semáforo
 - **Arquitetura (Backend):** 🟢 ESTÁVEL (Modularizado em `src/maestro`)
 - **Interface (CLI):** 🟢 ESTÁVEL (Com feedback visual/spinner)
 - **Funcionalidades Core:** 🟡 PARCIAL (Falta `stop`/`resume`)
 - **Testes:** 🔴 CRÍTICO (Inexistentes, prioridade alta)
-- **Repositório GitHub:** 🟢 ESTÁVEL (Criado e sincronizado)
+- **Repositório GitHub:** 🟢 ESTÁVEL (Criado, sincronizado e com release v1.0.0)
 
 ## 📌 Onde Paramos?
-Acabamos de concluir o ciclo **Modularização + Refinamento de UX + Publicação no GitHub**.
-O sistema funciona, é bonito, o código está organizado e agora está versionado no GitHub.
-O último ato foi a criação do repositório `bolivaralencastro/maestro` e o push inicial.
+Acabamos de concluir o ciclo **Modularização + Refinamento de UX + Publicação no GitHub + Release v1.0.0**.
+O sistema funciona, é bonito, o código está organizado, versionado e temos uma release oficial.
+O último ato foi a criação da release v1.0.0 marcando o MVP Feature Complete.
 
 ## 👉 Próxima Ação Imediata
 O próximo Orquestrador deve escolher entre:
