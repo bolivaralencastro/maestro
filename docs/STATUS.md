@@ -15,9 +15,9 @@ O sistema funciona, é bonito, o código está organizado, versionado e temos um
 O último ato foi a criação da release v1.0.0 marcando o MVP Feature Complete.
 
 ## 👉 Próxima Ação Imediata
-O próximo Orquestrador deve escolher entre:
-1.  **Higiene de Sessão:** Implementar `maestro session stop` e `maestro session resume` em `src/maestro/session.py`.
-2.  **Blindagem:** Criar a estrutura `tests/` e escrever testes unitários para `src/maestro/*.py`.
+**Foque apenas em:** Implementar `maestro session stop` e `maestro session resume` em `src/maestro/session.py`.
+
+Esta é a prioridade número 1 para completar as funcionalidades core de gerenciamento de sessões.
 
 ## ⚠️ Contexto Crítico
 - O comando `run` agora usa **STDIN** para passar prompts. Não reverta isso.
