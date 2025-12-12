@@ -1,0 +1,23 @@
+{
+  "id": "0001",
+  "tool": "codex exec --sandbox workspace-write",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "error",
+  "created_at": "2025-12-12T21:25:20.870418+00:00",
+  "context_refs": [
+    "ctx-0001"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "d3b77f66ebb7f8dc22b7f38b01fa0e8aa81fb00c86e790024730ac9cac51e565"
+    }
+  ],
+  "started_at": "2025-12-12T21:25:20.877272+00:00",
+  "finished_at": "2025-12-12T21:25:22.507048+00:00",
+  "error": "error: unexpected argument '--- ctx-0001 (bin/maestro) ---\n#!/usr/bin/env python3\n\nimport json\nimport hashlib\nimport re\nimport secrets\nimport shlex\nimport shutil\nimport subprocess\nimport sys\nimport time\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Optional, Tuple\n\n\nROOT_DIR ' found\n\n  tip: to pass '--- ctx-0001 (bin/maestro) ---\n#!/usr/bin/env python3\n\nimport json\nimport hashlib\nimport re\nimport secrets\nimport shlex\nimport shutil\nimport subprocess\nimport sys\nimport time\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Optional, Tuple\n\n\nROOT_DIR ' as a value, use '-- --- ctx-0001 (bin/maestro) ---\n#!/usr/bin/env python3\n\nimport json\nimport hashlib\nimport re\nimport secrets\nimport shlex\nimport shutil\nimport subprocess\nimport sys\nimport time\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Optional, Tuple\n\n\nROOT_DIR '\n\nUsage: codex exec --sandbox <SANDBOX_MODE> [PROMPT]\n\nFor more information, try '--help'."
+}

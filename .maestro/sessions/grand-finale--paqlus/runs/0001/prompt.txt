@@ -1,0 +1,3 @@
+Você é o CODEX. Leia o STATUS.md.
+Confirme se o código em src/maestro/ está pronto para hibernação.
+Responda curto: 'CODEX: [Status] - [Frase de efeito sobre o código]'

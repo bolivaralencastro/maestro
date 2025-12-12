@@ -1,0 +1,124 @@
+{
+  "sessions": [
+    {
+      "id": "a--6wkf98",
+      "slug": "a",
+      "state": "iniciada",
+      "created_at": "2025-12-12T13:45:07.744639+00:00",
+      "updated_at": "2025-12-12T13:45:07.744639+00:00"
+    },
+    {
+      "id": "b--eop0d5",
+      "slug": "b",
+      "state": "iniciada",
+      "created_at": "2025-12-12T13:45:20.005462+00:00",
+      "updated_at": "2025-12-12T13:45:20.005462+00:00"
+    },
+    {
+      "id": "teste-contexto-lista--ewdf16",
+      "slug": "teste-contexto-lista",
+      "state": "iniciada",
+      "created_at": "2025-12-12T18:26:08.949679+00:00",
+      "updated_at": "2025-12-12T18:26:08.949679+00:00"
+    },
+    {
+      "id": "teste-contexto-vazio--ngwc3n",
+      "slug": "teste-contexto-vazio",
+      "state": "iniciada",
+      "created_at": "2025-12-12T18:26:19.296908+00:00",
+      "updated_at": "2025-12-12T18:26:19.296908+00:00"
+    },
+    {
+      "id": "teste-refactor--tdso1p",
+      "slug": "teste-refactor",
+      "state": "iniciada",
+      "created_at": "2025-12-12T18:54:28.133175+00:00",
+      "updated_at": "2025-12-12T18:54:28.133175+00:00"
+    },
+    {
+      "id": "teste-vazio--avrnkk",
+      "slug": "teste-vazio",
+      "state": "iniciada",
+      "created_at": "2025-12-12T18:54:36.869214+00:00",
+      "updated_at": "2025-12-12T18:54:36.869214+00:00"
+    },
+    {
+      "id": "teste-refactor--rjiz93",
+      "slug": "teste-refactor",
+      "state": "iniciada",
+      "created_at": "2025-12-12T18:57:58.490353+00:00",
+      "updated_at": "2025-12-12T18:57:58.490353+00:00"
+    },
+    {
+      "id": "teste-vazio--6pxtyu",
+      "slug": "teste-vazio",
+      "state": "iniciada",
+      "created_at": "2025-12-12T18:58:10.205573+00:00",
+      "updated_at": "2025-12-12T18:58:10.205573+00:00"
+    },
+    {
+      "id": "teste-remove--gmp43w",
+      "slug": "teste-remove",
+      "state": "iniciada",
+      "created_at": "2025-12-12T19:18:15.173332+00:00",
+      "updated_at": "2025-12-12T19:18:15.173332+00:00"
+    },
+    {
+      "id": "teste-run--mg7i99",
+      "slug": "teste-run",
+      "state": "iniciada",
+      "created_at": "2025-12-12T20:15:06.795329+00:00",
+      "updated_at": "2025-12-12T20:15:06.795329+00:00"
+    },
+    {
+      "id": "validacao-mvp--7p8j99",
+      "slug": "validacao-mvp",
+      "state": "iniciada",
+      "created_at": "2025-12-12T20:39:19.875972+00:00",
+      "updated_at": "2025-12-12T20:39:19.875972+00:00"
+    },
+    {
+      "id": "dogfooding-modularizacao--u20en5",
+      "slug": "dogfooding-modularizacao",
+      "state": "iniciada",
+      "created_at": "2025-12-12T21:24:47.454105+00:00",
+      "updated_at": "2025-12-12T21:24:47.454105+00:00"
+    },
+    {
+      "id": "auditoria-modularizacao--01v0dl",
+      "slug": "auditoria-modularizacao",
+      "state": "iniciada",
+      "created_at": "2025-12-12T21:45:28.456572+00:00",
+      "updated_at": "2025-12-12T21:45:28.456572+00:00"
+    },
+    {
+      "id": "refinamento-ux-qwen--dkqlwt",
+      "slug": "refinamento-ux-qwen",
+      "state": "iniciada",
+      "created_at": "2025-12-12T21:53:26.685359+00:00",
+      "updated_at": "2025-12-12T21:53:26.685359+00:00"
+    },
+    {
+      "id": "consolidacao-mistral--cr9om5",
+      "slug": "consolidacao-mistral",
+      "state": "iniciada",
+      "created_at": "2025-12-12T22:01:19.849767+00:00",
+      "updated_at": "2025-12-12T22:01:19.849767+00:00"
+    },
+    {
+      "id": "ux-impl-full-cycle--dlxonm",
+      "slug": "ux-impl-full-cycle",
+      "state": "iniciada",
+      "created_at": "2025-12-12T22:13:09.983187+00:00",
+      "updated_at": "2025-12-12T22:13:09.983187+00:00"
+    },
+    {
+      "id": "grand-finale--paqlus",
+      "slug": "grand-finale",
+      "state": "iniciada",
+      "created_at": "2025-12-12T22:34:12.208621+00:00",
+      "updated_at": "2025-12-12T22:34:12.208621+00:00",
+      "active": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0010",
+  "kind": "file",
+  "source": {
+    "path_rel": "EVOLUTION.md",
+    "added_at": "2025-12-12T22:22:36.100279+00:00",
+    "digest": "20615a67780a6f6fa63551e9e8cd56263f22d6dbc646a559cbfb9178797759a2",
+    "mtime": "2025-12-12T22:03:36.317195+00:00",
+    "size": 22245
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0010.txt",
+    "digest": "20615a67780a6f6fa63551e9e8cd56263f22d6dbc646a559cbfb9178797759a2"
+  },
+  "state": "active"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0007",
+  "kind": "file",
+  "source": {
+    "path_rel": "bin/maestro",
+    "added_at": "2025-12-12T21:45:29.870070+00:00",
+    "digest": "4f5bf481b37b109dc4a5f861f6150ee0d214d086ef7b2b6632425b94ac3ba205",
+    "mtime": "2025-12-12T21:36:35.739233+00:00",
+    "size": 257
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0007.txt",
+    "digest": "4f5bf481b37b109dc4a5f861f6150ee0d214d086ef7b2b6632425b94ac3ba205"
+  },
+  "state": "active"
+}

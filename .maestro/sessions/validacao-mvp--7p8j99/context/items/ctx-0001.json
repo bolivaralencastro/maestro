@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0001",
+  "kind": "file",
+  "source": {
+    "path_rel": "README.md",
+    "added_at": "2025-12-12T20:39:20.027405+00:00",
+    "digest": "040798e06d992e0c0d57ceaa44233bb03be4c3dc9da3cf9ea808fd0410b30781",
+    "mtime": "2025-12-12T14:13:28.123394+00:00",
+    "size": 1492
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0001.txt",
+    "digest": "040798e06d992e0c0d57ceaa44233bb03be4c3dc9da3cf9ea808fd0410b30781"
+  },
+  "state": "active"
+}

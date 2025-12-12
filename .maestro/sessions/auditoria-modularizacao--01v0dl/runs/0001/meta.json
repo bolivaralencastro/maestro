@@ -1,0 +1,57 @@
+{
+  "id": "0001",
+  "tool": "gemini --output-format text",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T21:45:41.925487+00:00",
+  "context_refs": [
+    "ctx-0001",
+    "ctx-0002",
+    "ctx-0003",
+    "ctx-0004",
+    "ctx-0005",
+    "ctx-0006",
+    "ctx-0007"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "1344365a25945222d3245120ecb8e735c249f710305f7765ef899e84fe760c3b"
+    },
+    {
+      "id": "ctx-0002",
+      "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c"
+    },
+    {
+      "id": "ctx-0003",
+      "digest": "5e72d3981425b55096a74917b51dd18d6fc2432ee04e3d65356ced368d1e914c"
+    },
+    {
+      "id": "ctx-0004",
+      "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355"
+    },
+    {
+      "id": "ctx-0005",
+      "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6"
+    },
+    {
+      "id": "ctx-0006",
+      "digest": "cf136ee2b5ea92ede5bfd31b1dd4e0b7b907375df1f242fc101ce4b14bc1f54d"
+    },
+    {
+      "id": "ctx-0007",
+      "digest": "4f5bf481b37b109dc4a5f861f6150ee0d214d086ef7b2b6632425b94ac3ba205"
+    }
+  ],
+  "started_at": "2025-12-12T21:45:41.930253+00:00",
+  "finished_at": "2025-12-12T21:47:42.881475+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 3502,
+    "digest": "b6a9729748aa7ac3351bd7c8136f8053f5732a7e3c825cc2550cc334582761b3"
+  }
+}

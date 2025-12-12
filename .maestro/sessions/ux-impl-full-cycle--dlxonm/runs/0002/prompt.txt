@@ -1,0 +1,7 @@
+Você é o GEMINI. Revise a implementação do SPINNER em 'tools.py' e a mensagem em 'context.py'.
+Foque em THREAD SAFETY:
+- O uso de threading.Event está correto?
+- Existe risco de race condition no stdout (print)?
+- O daemon=True é seguro aqui?
+
+Gere o Log de Revisão (GEMINI.md). Termine com APROVADO/REJEITADO.

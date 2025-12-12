@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0004",
+  "kind": "file",
+  "source": {
+    "path_rel": "src/maestro/context.py",
+    "added_at": "2025-12-12T21:45:29.241865+00:00",
+    "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355",
+    "mtime": "2025-12-12T21:35:34.388814+00:00",
+    "size": 11672
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0004.txt",
+    "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355"
+  },
+  "state": "active"
+}

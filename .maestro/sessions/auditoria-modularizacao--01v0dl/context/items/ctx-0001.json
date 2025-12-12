@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0001",
+  "kind": "file",
+  "source": {
+    "path_rel": "GEMINI.md",
+    "added_at": "2025-12-12T21:45:28.621566+00:00",
+    "digest": "1344365a25945222d3245120ecb8e735c249f710305f7765ef899e84fe760c3b",
+    "mtime": "2025-12-12T19:32:08.359790+00:00",
+    "size": 812
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0001.txt",
+    "digest": "1344365a25945222d3245120ecb8e735c249f710305f7765ef899e84fe760c3b"
+  },
+  "state": "active"
+}

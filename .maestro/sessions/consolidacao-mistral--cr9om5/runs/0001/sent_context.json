@@ -1,0 +1,37 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "e4a6074b3828942879091ca0dbca24d9ce31dbf38cc7a2a901f9cc5dde9c4055",
+    "path_rel": "MISTRAL.md"
+  },
+  {
+    "id": "ctx-0002",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0002.txt",
+    "digest": "fb6a960e675fc90ffe6150fdd4a1bae6e9e1c051e54bfebb0adb0cc034e5692c",
+    "path_rel": "EVOLUTION.md"
+  },
+  {
+    "id": "ctx-0003",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0003.txt",
+    "digest": "aaaf2608962d9767ac9d45dfd92776823fe1e3d511c2284c8e77a2adbac87cf1",
+    "path_rel": "docs/logs/2025-12-12_183700__CODEX__refactor-modularization_IMPLEMENTATION.md"
+  },
+  {
+    "id": "ctx-0004",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0004.txt",
+    "digest": "58e080f138a0117405f31bcdaeafe289fff4ed7cd3411af398f38a97fd23b9c8",
+    "path_rel": "docs/logs/2025-12-12_184700__GEMINI__refactor-modularization_REVIEW.md"
+  },
+  {
+    "id": "ctx-0005",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0005.txt",
+    "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07",
+    "path_rel": "docs/logs/2025-12-12_185200__QWEN__refactor-modularization_REFINEMENT.md"
+  }
+]

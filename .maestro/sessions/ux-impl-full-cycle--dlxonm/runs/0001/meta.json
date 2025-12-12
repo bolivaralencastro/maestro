@@ -1,0 +1,42 @@
+{
+  "id": "0001",
+  "tool": "codex exec --sandbox workspace-write --skip-git-repo-check",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T22:13:33.997859+00:00",
+  "context_refs": [
+    "ctx-0001",
+    "ctx-0002",
+    "ctx-0003",
+    "ctx-0004"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6"
+    },
+    {
+      "id": "ctx-0002",
+      "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355"
+    },
+    {
+      "id": "ctx-0003",
+      "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c"
+    },
+    {
+      "id": "ctx-0004",
+      "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07"
+    }
+  ],
+  "started_at": "2025-12-12T22:13:34.003520+00:00",
+  "finished_at": "2025-12-12T22:16:08.021406+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 19702,
+    "digest": "28d0f0b64d5c0c899869beae104f3763026153a5bf0e0fb9ec31585085a0ee62"
+  }
+}

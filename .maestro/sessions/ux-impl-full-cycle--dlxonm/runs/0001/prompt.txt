@@ -1,0 +1,16 @@
+Você é o Especialista Python (CODEX).
+Analise os arquivos src/maestro/tools.py e src/maestro/context.py.
+Implemente as melhorias de UX solicitadas no log do QWEN no contexto.
+
+REQUISITOS:
+1. Em 'src/maestro/tools.py': Implemente um SPINNER visual animado (ex: '|/-\') que rode enquanto o subprocesso executa.
+   - Use 'threading' para não bloquear.
+   - A animação deve parar assim que o processo terminar.
+   - Limpe a linha do spinner antes de mostrar o resultado.
+
+2. Em 'src/maestro/context.py': No comando 'context_remove', exiba uma mensagem de sucesso detalhada:
+   - 'Item X removido. Restam Y itens no contexto.'
+
+SAÍDA:
+- Gere o código completo atualizado de 'src/maestro/tools.py' e 'src/maestro/context.py'.
+- Use marcadores claros: # ARQUIVO: src/maestro/nome.py

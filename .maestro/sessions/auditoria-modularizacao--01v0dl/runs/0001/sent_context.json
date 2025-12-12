@@ -1,0 +1,51 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "1344365a25945222d3245120ecb8e735c249f710305f7765ef899e84fe760c3b",
+    "path_rel": "GEMINI.md"
+  },
+  {
+    "id": "ctx-0002",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0002.txt",
+    "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c",
+    "path_rel": "src/maestro/utils.py"
+  },
+  {
+    "id": "ctx-0003",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0003.txt",
+    "digest": "5e72d3981425b55096a74917b51dd18d6fc2432ee04e3d65356ced368d1e914c",
+    "path_rel": "src/maestro/session.py"
+  },
+  {
+    "id": "ctx-0004",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0004.txt",
+    "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355",
+    "path_rel": "src/maestro/context.py"
+  },
+  {
+    "id": "ctx-0005",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0005.txt",
+    "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6",
+    "path_rel": "src/maestro/tools.py"
+  },
+  {
+    "id": "ctx-0006",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0006.txt",
+    "digest": "cf136ee2b5ea92ede5bfd31b1dd4e0b7b907375df1f242fc101ce4b14bc1f54d",
+    "path_rel": "src/maestro/cli.py"
+  },
+  {
+    "id": "ctx-0007",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0007.txt",
+    "digest": "4f5bf481b37b109dc4a5f861f6150ee0d214d086ef7b2b6632425b94ac3ba205",
+    "path_rel": "bin/maestro"
+  }
+]

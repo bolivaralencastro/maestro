@@ -1,0 +1,27 @@
+{
+  "id": "0002",
+  "tool": "codex exec --sandbox workspace-write --skip-git-repo-check",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T21:29:33.495511+00:00",
+  "context_refs": [
+    "ctx-0001"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "d3b77f66ebb7f8dc22b7f38b01fa0e8aa81fb00c86e790024730ac9cac51e565"
+    }
+  ],
+  "started_at": "2025-12-12T21:29:33.500776+00:00",
+  "finished_at": "2025-12-12T21:32:08.066779+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 33417,
+    "digest": "fa350a8bdb9920671ecd32d2304c9026fcf1c7f201a86dcc2aae54c16848d63a"
+  }
+}

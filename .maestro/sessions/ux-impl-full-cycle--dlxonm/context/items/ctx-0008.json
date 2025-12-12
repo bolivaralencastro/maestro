@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0008",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/logs/2025-12-12_192500__GEMINI__ux-refinement_REVIEW.md",
+    "added_at": "2025-12-12T22:21:19.198580+00:00",
+    "digest": "36d4a2a7658287545935f1b0648db44594a38634355360795c777780fd0c3fae",
+    "mtime": "2025-12-12T22:20:43.381493+00:00",
+    "size": 2261
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0008.txt",
+    "digest": "36d4a2a7658287545935f1b0648db44594a38634355360795c777780fd0c3fae"
+  },
+  "state": "active"
+}

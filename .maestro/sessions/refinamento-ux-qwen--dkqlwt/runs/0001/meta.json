@@ -1,0 +1,47 @@
+{
+  "id": "0001",
+  "tool": "qwen --output-format text",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T21:53:42.546803+00:00",
+  "context_refs": [
+    "ctx-0001",
+    "ctx-0002",
+    "ctx-0003",
+    "ctx-0004",
+    "ctx-0005"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "4fd94745940f018b2377d4199d8597b8aaba47d25acdd8cb38237acfe963cb5b"
+    },
+    {
+      "id": "ctx-0002",
+      "digest": "cf136ee2b5ea92ede5bfd31b1dd4e0b7b907375df1f242fc101ce4b14bc1f54d"
+    },
+    {
+      "id": "ctx-0003",
+      "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355"
+    },
+    {
+      "id": "ctx-0004",
+      "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6"
+    },
+    {
+      "id": "ctx-0005",
+      "digest": "58e080f138a0117405f31bcdaeafe289fff4ed7cd3411af398f38a97fd23b9c8"
+    }
+  ],
+  "started_at": "2025-12-12T21:53:42.551497+00:00",
+  "finished_at": "2025-12-12T21:55:10.888794+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 6874,
+    "digest": "87549014c09afdedc08e8b3bc61055cabfadc4acd77a893e7821cc4c7946f4f5"
+  }
+}

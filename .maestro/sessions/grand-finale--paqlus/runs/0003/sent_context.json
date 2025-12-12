@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "25a44588b2849c906d164805baae9b306e5a83bc5ebf6b4dc95767dd80eeebc8",
+    "path_rel": "docs/STATUS.md"
+  },
+  {
+    "id": "ctx-0002",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0002.txt",
+    "digest": "8720cce29cf08530ed61ae7914c18d02656c9fb33ad3f6e49715066e6a059033",
+    "path_rel": "docs/ORCHESTRATOR.md"
+  },
+  {
+    "id": "ctx-0003",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0003.txt",
+    "digest": "cf136ee2b5ea92ede5bfd31b1dd4e0b7b907375df1f242fc101ce4b14bc1f54d",
+    "path_rel": "src/maestro/cli.py"
+  }
+]

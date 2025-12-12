@@ -1,0 +1,17 @@
+{
+  "id": "ctx-0002",
+  "kind": "file",
+  "source": {
+    "path_rel": "1-PROJECT.md",
+    "added_at": "2025-12-12T19:18:22.920390+00:00",
+    "digest": "a7653fdd8b3766b054a40253a48d8d8e36384c21684f583e8620d82b8be01b26",
+    "mtime": "2025-12-12T12:38:16.607203+00:00",
+    "size": 4896
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0002.txt",
+    "digest": "a7653fdd8b3766b054a40253a48d8d8e36384c21684f583e8620d82b8be01b26"
+  },
+  "state": "removed",
+  "removed_at": "2025-12-12T19:18:39.464199+00:00"
+}

@@ -1,0 +1,87 @@
+{
+  "id": "0004",
+  "tool": "vibe -p --output text",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T22:22:37.318752+00:00",
+  "context_refs": [
+    "ctx-0001",
+    "ctx-0002",
+    "ctx-0003",
+    "ctx-0004",
+    "ctx-0005",
+    "ctx-0006",
+    "ctx-0007",
+    "ctx-0008",
+    "ctx-0009",
+    "ctx-0010",
+    "ctx-0011",
+    "ctx-0012",
+    "ctx-0013"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6"
+    },
+    {
+      "id": "ctx-0002",
+      "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355"
+    },
+    {
+      "id": "ctx-0003",
+      "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c"
+    },
+    {
+      "id": "ctx-0004",
+      "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07"
+    },
+    {
+      "id": "ctx-0005",
+      "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6"
+    },
+    {
+      "id": "ctx-0006",
+      "digest": "404a1e032bce09f9fd62471c82e83ee7d4acc1039856080bf12f05daa63c5e12"
+    },
+    {
+      "id": "ctx-0007",
+      "digest": "ad616667d37a4833e40438956c7675cb03e2f8660bbb2b671e93f3ca62e8c05d"
+    },
+    {
+      "id": "ctx-0008",
+      "digest": "36d4a2a7658287545935f1b0648db44594a38634355360795c777780fd0c3fae"
+    },
+    {
+      "id": "ctx-0009",
+      "digest": "e4a6074b3828942879091ca0dbca24d9ce31dbf38cc7a2a901f9cc5dde9c4055"
+    },
+    {
+      "id": "ctx-0010",
+      "digest": "20615a67780a6f6fa63551e9e8cd56263f22d6dbc646a559cbfb9178797759a2"
+    },
+    {
+      "id": "ctx-0011",
+      "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6"
+    },
+    {
+      "id": "ctx-0012",
+      "digest": "36d4a2a7658287545935f1b0648db44594a38634355360795c777780fd0c3fae"
+    },
+    {
+      "id": "ctx-0013",
+      "digest": "639becdc439753ed6ce73123ebe38085f3c4e5e26b2819d0ca9c3300a0bcbd0c"
+    }
+  ],
+  "started_at": "2025-12-12T22:22:37.321461+00:00",
+  "finished_at": "2025-12-12T22:23:08.853668+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 4474,
+    "digest": "20f83d83a103f0b7c84041b4669e8e26e34d6847122bca4081642b7aa27e6de9"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "0004",
+  "tool": "vibe -p --output text",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T22:38:58.021237+00:00",
+  "context_refs": [
+    "ctx-0001",
+    "ctx-0002",
+    "ctx-0003"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "25a44588b2849c906d164805baae9b306e5a83bc5ebf6b4dc95767dd80eeebc8"
+    },
+    {
+      "id": "ctx-0002",
+      "digest": "8720cce29cf08530ed61ae7914c18d02656c9fb33ad3f6e49715066e6a059033"
+    },
+    {
+      "id": "ctx-0003",
+      "digest": "cf136ee2b5ea92ede5bfd31b1dd4e0b7b907375df1f242fc101ce4b14bc1f54d"
+    }
+  ],
+  "started_at": "2025-12-12T22:38:58.024099+00:00",
+  "finished_at": "2025-12-12T22:39:10.087555+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 351,
+    "digest": "b2a4a8e77ab26c71f017865bac099b36749ca54bfa48ce4ac21e1044bcbfd9fa"
+  }
+}

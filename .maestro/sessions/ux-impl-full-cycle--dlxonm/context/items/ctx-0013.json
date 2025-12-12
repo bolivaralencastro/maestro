@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0013",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/logs/2025-12-12_193000__QWEN__ux-refinement_VALIDATION.md",
+    "added_at": "2025-12-12T22:22:36.900322+00:00",
+    "digest": "639becdc439753ed6ce73123ebe38085f3c4e5e26b2819d0ca9c3300a0bcbd0c",
+    "mtime": "2025-12-12T22:22:15.836496+00:00",
+    "size": 1114
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0013.txt",
+    "digest": "639becdc439753ed6ce73123ebe38085f3c4e5e26b2819d0ca9c3300a0bcbd0c"
+  },
+  "state": "active"
+}

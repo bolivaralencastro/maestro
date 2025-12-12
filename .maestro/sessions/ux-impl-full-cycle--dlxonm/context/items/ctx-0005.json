@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0005",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/logs/2025-12-12_191900__CODEX__ux-refinement_IMPLEMENTATION.md",
+    "added_at": "2025-12-12T22:18:01.777277+00:00",
+    "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6",
+    "mtime": "2025-12-12T22:17:44.740469+00:00",
+    "size": 831
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0005.txt",
+    "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6"
+  },
+  "state": "active"
+}

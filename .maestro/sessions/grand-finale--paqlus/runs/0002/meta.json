@@ -1,0 +1,37 @@
+{
+  "id": "0002",
+  "tool": "gemini --output-format text",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T22:35:04.936976+00:00",
+  "context_refs": [
+    "ctx-0001",
+    "ctx-0002",
+    "ctx-0003"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "25a44588b2849c906d164805baae9b306e5a83bc5ebf6b4dc95767dd80eeebc8"
+    },
+    {
+      "id": "ctx-0002",
+      "digest": "8720cce29cf08530ed61ae7914c18d02656c9fb33ad3f6e49715066e6a059033"
+    },
+    {
+      "id": "ctx-0003",
+      "digest": "cf136ee2b5ea92ede5bfd31b1dd4e0b7b907375df1f242fc101ce4b14bc1f54d"
+    }
+  ],
+  "started_at": "2025-12-12T22:35:04.944728+00:00",
+  "finished_at": "2025-12-12T22:36:06.126912+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 130,
+    "digest": "e5ee037870314d77756040d94b2554316d4ff3c71a5fed5e7fbd2a0ed601ed37"
+  }
+}

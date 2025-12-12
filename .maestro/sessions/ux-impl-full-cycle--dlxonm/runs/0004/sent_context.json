@@ -1,0 +1,93 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6",
+    "path_rel": "src/maestro/tools.py"
+  },
+  {
+    "id": "ctx-0002",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0002.txt",
+    "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355",
+    "path_rel": "src/maestro/context.py"
+  },
+  {
+    "id": "ctx-0003",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0003.txt",
+    "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c",
+    "path_rel": "src/maestro/utils.py"
+  },
+  {
+    "id": "ctx-0004",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0004.txt",
+    "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07",
+    "path_rel": "docs/logs/2025-12-12_185200__QWEN__refactor-modularization_REFINEMENT.md"
+  },
+  {
+    "id": "ctx-0005",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0005.txt",
+    "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6",
+    "path_rel": "docs/logs/2025-12-12_191900__CODEX__ux-refinement_IMPLEMENTATION.md"
+  },
+  {
+    "id": "ctx-0006",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0006.txt",
+    "digest": "404a1e032bce09f9fd62471c82e83ee7d4acc1039856080bf12f05daa63c5e12",
+    "path_rel": "src/maestro/tools.py"
+  },
+  {
+    "id": "ctx-0007",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0007.txt",
+    "digest": "ad616667d37a4833e40438956c7675cb03e2f8660bbb2b671e93f3ca62e8c05d",
+    "path_rel": "src/maestro/context.py"
+  },
+  {
+    "id": "ctx-0008",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0008.txt",
+    "digest": "36d4a2a7658287545935f1b0648db44594a38634355360795c777780fd0c3fae",
+    "path_rel": "docs/logs/2025-12-12_192500__GEMINI__ux-refinement_REVIEW.md"
+  },
+  {
+    "id": "ctx-0009",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0009.txt",
+    "digest": "e4a6074b3828942879091ca0dbca24d9ce31dbf38cc7a2a901f9cc5dde9c4055",
+    "path_rel": "MISTRAL.md"
+  },
+  {
+    "id": "ctx-0010",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0010.txt",
+    "digest": "20615a67780a6f6fa63551e9e8cd56263f22d6dbc646a559cbfb9178797759a2",
+    "path_rel": "EVOLUTION.md"
+  },
+  {
+    "id": "ctx-0011",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0011.txt",
+    "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6",
+    "path_rel": "docs/logs/2025-12-12_191900__CODEX__ux-refinement_IMPLEMENTATION.md"
+  },
+  {
+    "id": "ctx-0012",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0012.txt",
+    "digest": "36d4a2a7658287545935f1b0648db44594a38634355360795c777780fd0c3fae",
+    "path_rel": "docs/logs/2025-12-12_192500__GEMINI__ux-refinement_REVIEW.md"
+  },
+  {
+    "id": "ctx-0013",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0013.txt",
+    "digest": "639becdc439753ed6ce73123ebe38085f3c4e5e26b2819d0ca9c3300a0bcbd0c",
+    "path_rel": "docs/logs/2025-12-12_193000__QWEN__ux-refinement_VALIDATION.md"
+  }
+]

@@ -1,0 +1,978 @@
+# ARQUIVO: src/maestro/utils.py
+import hashlib
+import json
+import re
+import secrets
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+MAESTRO_DIR = ROOT_DIR / ".maestro"
+SESSIONS_DIR = MAESTRO_DIR / "sessions"
+INDEX_FILE = SESSIONS_DIR / "index.json"
+ACTIVE_FILE = SESSIONS_DIR / "active"
+
+
+def iso_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def slugify(name: str) -> Tuple[str, bool]:
+    base = name.strip().lower()
+    base = re.sub(r"[^a-z0-9]+", "-", base)
+    base = re.sub(r"-{2,}", "-", base).strip("-")
+    if not base:
+        return "session", True
+    return base, False
+
+
+def random_base36(length: int = 6) -> str:
+    alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+    number = secrets.randbelow(36**length)
+    digits: List[str] = []
+    for _ in range(length):
+        number, rem = divmod(number, 36)
+        digits.append(alphabet[rem])
+    return "".join(reversed(digits)).rjust(length, "0")
+
+
+def read_json(path: Path, default: Dict[str, Any]) -> Dict[str, Any]:
+    if not path.exists():
+        return default
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        return default
+
+
+def read_active_session_id() -> Tuple[bool, str | None]:
+    exists = ACTIVE_FILE.exists()
+    if not exists:
+        return False, None
+    try:
+        content = ACTIVE_FILE.read_text(encoding="utf-8").strip()
+    except OSError:
+        return True, None
+    return True, content or None
+
+
+def write_json(path: Path, data: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+
+def ensure_base_structure() -> None:
+    (MAESTRO_DIR / "config").mkdir(parents=True, exist_ok=True)
+    SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    (MAESTRO_DIR / "logs").mkdir(parents=True, exist_ok=True)
+
+
+def format_size(size: Optional[int]) -> str:
+    if size is None:
+        return "tamanho desconhecido"
+    units = ["B", "KB", "MB", "GB", "TB"]
+    value = float(size)
+    unit = "B"
+    for candidate in units:
+        unit = candidate
+        if value < 1024 or candidate == units[-1]:
+            break
+        value /= 1024
+    if unit == "B":
+        return f"{int(value)} {unit}"
+    return f"{value:.1f} {unit}"
+
+
+def short_digest(digest: Optional[str]) -> str:
+    if not digest:
+        return "?"
+    return f"{digest[:7]}..." if len(digest) > 7 else digest
+
+
+# ARQUIVO: src/maestro/session.py
+import json
+import shutil
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+from maestro.utils import (
+    ACTIVE_FILE,
+    INDEX_FILE,
+    MAESTRO_DIR,
+    ROOT_DIR,
+    SESSIONS_DIR,
+    ensure_base_structure,
+    iso_now,
+    random_base36,
+    read_active_session_id,
+    read_json,
+    slugify,
+    write_json,
+)
+
+
+def update_index(new_entry: Dict[str, Any], active_id: str) -> None:
+    index = read_json(INDEX_FILE, {"sessions": []})
+    cleaned_sessions: List[Dict[str, Any]] = []
+    for session in index.get("sessions", []):
+        session.pop("active", None)
+        if session.get("id") == active_id:
+            continue
+        cleaned_sessions.append(session)
+
+    new_entry = {**new_entry, "active": True}
+    cleaned_sessions.append(new_entry)
+    write_json(INDEX_FILE, {"sessions": cleaned_sessions})
+
+
+def create_session_layout(session_id: str) -> Path:
+    session_dir = SESSIONS_DIR / session_id
+    if session_dir.exists():
+        raise FileExistsError(f"Sessão {session_id} já existe")
+    session_dir.mkdir(parents=False, exist_ok=False)
+
+    subdirs = [
+        session_dir / "context" / "items",
+        session_dir / "context" / "blobs",
+        session_dir / "runs",
+        session_dir / "outputs",
+        session_dir / "exports",
+    ]
+
+    try:
+        for path in subdirs:
+            path.mkdir(parents=True, exist_ok=False)
+        active_path = session_dir / "context" / "active.json"
+        write_json(active_path, {"items": []})
+    except Exception:
+        shutil.rmtree(session_dir, ignore_errors=True)
+        raise
+
+    return session_dir
+
+
+def start_session(name: str) -> Tuple[str, Path]:
+    ensure_base_structure()
+    slug, used_fallback_slug = slugify(name)
+    if used_fallback_slug:
+        raise ValueError("Escolha um nome com caracteres alfanuméricos para a sessão.")
+    short_id = random_base36()
+    session_id = f"{slug}--{short_id}"
+    now = iso_now()
+
+    session_dir = create_session_layout(session_id)
+    session_json = {
+        "id": session_id,
+        "slug": slug,
+        "state": "iniciada",
+        "tool_active": None,
+        "created_at": now,
+        "updated_at": now,
+        "counters": {"run_seq": 0, "ctx_seq": 0},
+        "stats": {"runs_total": 0, "runs_success": 0, "runs_error": 0},
+    }
+    write_json(session_dir / "session.json", session_json)
+
+    index_entry = {
+        "id": session_id,
+        "slug": slug,
+        "state": "iniciada",
+        "created_at": now,
+        "updated_at": now,
+    }
+    update_index(index_entry, session_id)
+
+    ACTIVE_FILE.write_text(session_id, encoding="utf-8")
+
+    return session_id, session_dir
+
+
+def list_sessions() -> int:
+    index = read_json(INDEX_FILE, {"sessions": []})
+    sessions = index.get("sessions") or []
+    has_active_file, active_id_from_file = read_active_session_id()
+    active_id_from_index = next((sess.get("id") for sess in sessions if sess.get("active")), None)
+    active_id = active_id_from_file if has_active_file else active_id_from_index
+    warnings: List[str] = []
+
+    active_in_index = any(sess.get("id") == active_id for sess in sessions)
+    active_label = active_id or "nenhuma"
+    if has_active_file and active_id is None:
+        active_label = "nenhuma (arquivo de active vazio)"
+    elif active_id and not active_in_index:
+        active_label = f"{active_id} (não encontrada no índice)"
+        warnings.append("Aviso: arquivo de active aponta para uma sessão ausente no índice.")
+
+    print(f"Sessão ativa: {active_label}")
+    for warn in warnings:
+        print(warn)
+
+    if not sessions:
+        print("Nenhuma sessão registrada.")
+        return 0
+
+    print("Sessões registradas:")
+    for session in sessions:
+        session_id = session.get("id", "<sem-id>")
+        marker = "*" if session_id == active_id else "-"
+        slug = session.get("slug", "<sem-slug>")
+        created_at = session.get("created_at", "?")
+
+        session_dir = SESSIONS_DIR / session_id
+        session_json_path = session_dir / "session.json"
+        session_data = read_json(session_json_path, {}) if session_json_path.exists() else {}
+        state = session_data.get("state", session.get("state", "<desconhecido>"))
+        updated_at = session_data.get("updated_at", session.get("updated_at", "?"))
+        finalized_at = session_data.get("finalized_at", session.get("finalized_at"))
+        finalized_part = f" | finalizada: {finalized_at}" if finalized_at else ""
+        inconsistent = not session_dir.exists() or not session_json_path.exists()
+        inconsistency_tag = " [órfã]" if inconsistent else ""
+
+        print(
+            f"{marker} {session_id}{inconsistency_tag} | slug: {slug} | estado: {state} | criada: {created_at} | atualizada: {updated_at}{finalized_part}"
+        )
+
+    return 0
+
+
+def status_session() -> int:
+    if not MAESTRO_DIR.exists():
+        print("Nenhuma sessão ativa.")
+        print("Dica: use maestro session start <nome>.")
+        return 0
+
+    index = read_json(INDEX_FILE, {"sessions": []})
+    sessions = index.get("sessions") or []
+    has_active_file, active_id = read_active_session_id()
+    if not has_active_file:
+        active_id = next((sess.get("id") for sess in sessions if sess.get("active")), None)
+
+    if not active_id:
+        print("Nenhuma sessão ativa.")
+        print("Dica: use maestro session start <nome>.")
+        return 0
+
+    entry = next((sess for sess in sessions if sess.get("id") == active_id), None)
+    if entry is None:
+        print(f"Sessão ativa apontada ({active_id}) não existe no índice.")
+        return 0
+
+    session_dir = SESSIONS_DIR / active_id
+    if not session_dir.exists():
+        print(f"Diretório da sessão ativa não encontrado: {session_dir}")
+        return 0
+
+    session_json_path = session_dir / "session.json"
+    if not session_json_path.exists():
+        print(f"Metadados da sessão ativa não encontrados: {session_json_path}")
+        return 0
+
+    session_data = read_json(session_json_path, {})
+    slug = session_data.get("slug", entry.get("slug", "<desconhecido>"))
+    state = session_data.get("state", entry.get("state", "<desconhecido>"))
+    tool_active = session_data.get("tool_active")
+    created_at = session_data.get("created_at", entry.get("created_at", "?"))
+    updated_at = session_data.get("updated_at", entry.get("updated_at", "?"))
+
+    print(f"Sessão ativa: {active_id}")
+    print(f"slug: {slug}")
+    print(f"state: {state}")
+    print(f"tool_active: {tool_active}")
+    print(f"created_at: {created_at}")
+    print(f"updated_at: {updated_at}")
+
+    counters = session_data.get("counters")
+    if isinstance(counters, dict):
+        print("counters:")
+        if "run_seq" in counters:
+            print(f"  run_seq: {counters.get('run_seq')}")
+        if "ctx_seq" in counters:
+            print(f"  ctx_seq: {counters.get('ctx_seq')}")
+
+    stats = session_data.get("stats")
+    if isinstance(stats, dict):
+        print("stats:")
+        if "runs_total" in stats:
+            print(f"  runs_total: {stats.get('runs_total')}")
+        if "runs_success" in stats:
+            print(f"  runs_success: {stats.get('runs_success')}")
+        if "runs_error" in stats:
+            print(f"  runs_error: {stats.get('runs_error')}")
+
+    return 0
+
+
+def require_active_session() -> Tuple[str, Path, Dict[str, Any]]:
+    if not MAESTRO_DIR.exists():
+        raise RuntimeError("Nenhuma sessão foi criada ainda.")
+
+    has_active, active_id = read_active_session_id()
+    if not has_active or not active_id:
+        raise RuntimeError("Nenhuma sessão ativa. Use 'maestro session start <nome>'.")
+
+    session_dir = SESSIONS_DIR / active_id
+    session_json_path = session_dir / "session.json"
+    if not session_dir.exists():
+        raise RuntimeError(f"Sessão ativa inválida: {active_id}.")
+
+    try:
+        with session_json_path.open("r", encoding="utf-8") as f:
+            session_data = json.load(f)
+    except FileNotFoundError:
+        raise RuntimeError(f"Metadados da sessão ativa não encontrados: {session_json_path}")
+    except json.JSONDecodeError:
+        raise RuntimeError(f"Metadados da sessão ativa corrompidos: {session_json_path}")
+    except OSError:
+        raise RuntimeError(f"Não foi possível ler os metadados da sessão ativa: {session_json_path}")
+
+    if not session_data:
+        raise RuntimeError(f"Metadados da sessão ativa ausentes ou corrompidos: {session_json_path}.")
+
+    state = session_data.get("state")
+    if state == "finalizada":
+        raise RuntimeError("Sessão finalizada não pode ser modificada")
+
+    return active_id, session_dir, session_data
+
+
+# ARQUIVO: src/maestro/context.py
+import hashlib
+import json
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+from maestro.session import require_active_session
+from maestro.utils import (
+    ROOT_DIR,
+    format_size,
+    iso_now,
+    read_json,
+    short_digest,
+    write_json,
+)
+
+
+def context_add(file_arg: str) -> int:
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    target_path = Path(file_arg)
+    if not target_path.is_absolute():
+        target_path = (Path.cwd() / target_path).resolve()
+    if not target_path.exists() or not target_path.is_file():
+        print(f"Arquivo não encontrado ou não é um arquivo legível: {file_arg}", file=sys.stderr)
+        return 1
+
+    try:
+        content = target_path.read_bytes()
+    except OSError:
+        print(f"Não foi possível ler o arquivo: {file_arg}", file=sys.stderr)
+        return 1
+
+    digest = hashlib.sha256(content).hexdigest()
+    stat = target_path.stat()
+    mtime = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
+    size = stat.st_size
+    now = iso_now()
+
+    try:
+        path_rel = str(target_path.relative_to(ROOT_DIR))
+    except ValueError:
+        path_rel = str(target_path)
+
+    counters = session_data.get("counters") or {}
+    current_seq = counters.get("ctx_seq", 0)
+    next_seq = current_seq + 1
+    ctx_id = f"ctx-{next_seq:04d}"
+
+    blobs_dir = session_dir / "context" / "blobs"
+    items_dir = session_dir / "context" / "items"
+    active_path = session_dir / "context" / "active.json"
+
+    blob_path = blobs_dir / f"{ctx_id}.txt"
+    try:
+        blob_path.write_bytes(content)
+    except OSError:
+        print(f"Falha ao salvar snapshot do arquivo em {blob_path}", file=sys.stderr)
+        return 1
+
+    item_data = {
+        "id": ctx_id,
+        "kind": "file",
+        "source": {
+            "path_rel": path_rel,
+            "added_at": now,
+            "digest": digest,
+            "mtime": mtime,
+            "size": size,
+        },
+        "snapshot": {
+            "blob": f"../blobs/{ctx_id}.txt",
+            "digest": digest,
+        },
+        "state": "active",
+    }
+
+    write_json(items_dir / f"{ctx_id}.json", item_data)
+
+    active_data = read_json(active_path, {"items": []})
+    items_list = active_data.get("items") or []
+    items_list.append(ctx_id)
+    active_data["items"] = items_list
+    write_json(active_path, active_data)
+
+    counters["ctx_seq"] = next_seq
+    session_data["counters"] = counters
+    if session_data.get("state") in (None, "iniciada", "com_contexto"):
+        session_data["state"] = "com_contexto"
+    session_data["updated_at"] = now
+    write_json(session_dir / "session.json", session_data)
+
+    print(f"Contexto adicionado: {ctx_id} (sessão {session_id})")
+    return 0
+
+
+def context_list() -> int:
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    slug = session_data.get("slug", session_id)
+    context_dir = session_dir / "context"
+    active_path = context_dir / "active.json"
+    try:
+        with active_path.open("r", encoding="utf-8") as f:
+            active_data = json.load(f)
+    except FileNotFoundError:
+        active_data = {}
+    except json.JSONDecodeError:
+        print(f"Arquivo de contexto ativo corrompido: {active_path}", file=sys.stderr)
+        return 1
+    except OSError:
+        print(f"Não foi possível ler o contexto ativo: {active_path}", file=sys.stderr)
+        return 1
+
+    items_list = active_data.get("items") if isinstance(active_data, dict) else None
+    if not isinstance(items_list, list):
+        items_list = []
+
+    if not items_list:
+        print("Contexto vazio. Use 'maestro context add <arquivo>' para adicionar itens")
+        return 0
+
+    print(f"Contexto da sessão '{slug}' ({len(items_list)} itens):")
+    items_dir = context_dir / "items"
+    blobs_dir = context_dir / "blobs"
+
+    for raw_id in items_list:
+        item_id = raw_id if isinstance(raw_id, str) else str(raw_id)
+        meta_path = items_dir / f"{item_id}.json"
+        if not meta_path.exists():
+            print(f"  {item_id}  [metadados ausentes]")
+            continue
+
+        try:
+            with meta_path.open("r", encoding="utf-8") as f:
+                meta = json.load(f)
+        except json.JSONDecodeError:
+            print(f"  {item_id}  [erro ao ler metadados]")
+            continue
+        except OSError:
+            print(f"  {item_id}  [erro ao ler metadados]")
+            continue
+
+        source = meta.get("source") if isinstance(meta.get("source"), dict) else {}
+        snapshot = meta.get("snapshot") if isinstance(meta.get("snapshot"), dict) else {}
+        kind_value = meta.get("kind")
+        kind_label = {
+            "file": "arquivo",
+            "text": "texto",
+            "output": "saida",
+        }.get(kind_value, kind_value if isinstance(kind_value, str) else "<desconhecido>")
+
+        origin = "[origem ausente]"
+        if kind_value == "file":
+            path_rel = source.get("path_rel")
+            if isinstance(path_rel, str) and path_rel.strip():
+                origin = path_rel
+                if not origin.startswith("/") and not origin.startswith("."):
+                    origin = f"./{origin}"
+        elif kind_value == "text":
+            origin = "[texto]"
+        elif kind_value == "output":
+            run_id = source.get("run_id") if isinstance(source, dict) else None
+            origin = f"saída do run {run_id}" if run_id else "[output]"
+
+        size_value = source.get("size") if isinstance(source, dict) else None
+        if size_value is None and snapshot.get("blob"):
+            blob_candidate = blobs_dir / Path(str(snapshot.get("blob"))).name
+            try:
+                size_value = blob_candidate.stat().st_size
+            except OSError:
+                size_value = None
+
+        digest_value = snapshot.get("digest") or (source.get("digest") if isinstance(source, dict) else None)
+        size_label = format_size(size_value if isinstance(size_value, int) else None)
+        digest_label = short_digest(digest_value if isinstance(digest_value, str) else None)
+
+        print(f"  {item_id}  {kind_label}  {origin}  ({size_label}, SHA: {digest_label})")
+
+    return 0
+
+
+def context_remove(item_id: str) -> int:
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    if not item_id or not item_id.strip():
+        print("Erro: ID do item é obrigatório.", file=sys.stderr)
+        return 1
+
+    item_id = item_id.strip()
+    if not re.fullmatch(r"ctx-\d{4}", item_id):
+        print(f"Erro: ID inválido: {item_id}. Use o formato ctx-0001.", file=sys.stderr)
+        return 1
+
+    context_dir = session_dir / "context"
+    active_path = context_dir / "active.json"
+    items_dir = context_dir / "items"
+
+    active_data = read_json(active_path, {"items": []})
+    items_list_raw = active_data.get("items") if isinstance(active_data, dict) else []
+    items_list = items_list_raw if isinstance(items_list_raw, list) else []
+
+    item_path = items_dir / f"{item_id}.json"
+    item_data = read_json(item_path, {}) if item_path.exists() else {}
+    if item_data.get("state") == "removed":
+        print(f"Erro: Item {item_id} já foi removido anteriormente.", file=sys.stderr)
+        return 1
+
+    if not items_list or item_id not in items_list:
+        print(f"Erro: Item {item_id} não encontrado no contexto ativo.", file=sys.stderr)
+        return 1
+
+    if not item_path.exists():
+        print(f"Erro: Metadados do item {item_id} não encontrados.", file=sys.stderr)
+        return 1
+
+    now = iso_now()
+    item_data["state"] = "removed"
+    item_data["removed_at"] = now
+    write_json(item_path, item_data)
+
+    try:
+        items_list.remove(item_id)
+    except ValueError:
+        pass
+    active_data["items"] = items_list
+    write_json(active_path, active_data)
+
+    session_data["updated_at"] = now
+    if not items_list:
+        session_data["state"] = "iniciada"
+    write_json(session_dir / "session.json", session_data)
+
+    print(f"Item {item_id} removido do contexto (sessão {session_id})")
+    return 0
+
+
+def load_active_context(session_dir: Path) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[str]]:
+    context_dir = session_dir / "context"
+    active_path = context_dir / "active.json"
+    items_dir = context_dir / "items"
+
+    active_data = read_json(active_path, {"items": []})
+    raw_items = active_data.get("items") if isinstance(active_data, dict) else []
+    item_ids = raw_items if isinstance(raw_items, list) else []
+
+    context_entries: List[Dict[str, Any]] = []
+    sent_entries: List[Dict[str, Any]] = []
+    errors: List[str] = []
+
+    for raw_id in item_ids:
+        item_id = raw_id if isinstance(raw_id, str) else str(raw_id)
+        meta_path = items_dir / f"{item_id}.json"
+        if not meta_path.exists():
+            errors.append(f"Metadados do item {item_id} não encontrados.")
+            continue
+
+        meta = read_json(meta_path, {})
+        if not meta:
+            errors.append(f"Metadados do item {item_id} estão vazios ou corrompidos.")
+            continue
+        if meta.get("state") == "removed":
+            errors.append(f"Item {item_id} foi removido e não pode ser usado no contexto.")
+            continue
+
+        snapshot = meta.get("snapshot") if isinstance(meta.get("snapshot"), dict) else {}
+        source = meta.get("source") if isinstance(meta.get("source"), dict) else {}
+        snapshot_blob = snapshot.get("blob")
+        if not isinstance(snapshot_blob, str) or not snapshot_blob.strip():
+            snapshot_blob = f"../blobs/{item_id}.txt"
+        blob_path = (items_dir / snapshot_blob).resolve()
+
+        try:
+            blob_bytes = blob_path.read_bytes()
+        except OSError:
+            errors.append(f"Não foi possível ler o blob do item {item_id}: {blob_path}")
+            continue
+
+        digest_value = snapshot.get("digest")
+        if not isinstance(digest_value, str) or not digest_value.strip():
+            digest_value = hashlib.sha256(blob_bytes).hexdigest()
+
+        try:
+            blob_text = blob_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            blob_text = blob_bytes.decode("utf-8", errors="replace")
+
+        kind_value = meta.get("kind") if isinstance(meta.get("kind"), str) else "desconhecido"
+        path_rel = source.get("path_rel") if isinstance(source.get("path_rel"), str) else None
+
+        label = "[contexto]"
+        if kind_value == "file":
+            label = path_rel or "arquivo"
+        elif kind_value == "text":
+            label = "[texto]"
+        elif kind_value == "output":
+            label = "output"
+
+        context_entries.append(
+            {
+                "id": item_id,
+                "kind": kind_value,
+                "label": label,
+                "content": blob_text,
+                "digest": digest_value,
+                "snapshot_blob": snapshot_blob,
+                "path_rel": path_rel,
+            }
+        )
+
+        sent_entry: Dict[str, Any] = {
+            "id": item_id,
+            "kind": kind_value,
+            "snapshot_blob": snapshot_blob,
+            "digest": digest_value,
+        }
+        if path_rel:
+            sent_entry["path_rel"] = path_rel
+        sent_entries.append(sent_entry)
+
+    return context_entries, sent_entries, errors
+
+
+import sys  # noqa: E402
+
+
+# ARQUIVO: src/maestro/tools.py
+import hashlib
+import shlex
+import subprocess
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+from maestro.context import load_active_context
+from maestro.session import require_active_session
+from maestro.utils import iso_now, write_json
+
+
+def set_tool(tool_name: str) -> int:
+    tool = tool_name.strip()
+    if not tool:
+        print("Erro: nome da ferramenta é obrigatório.", file=sys.stderr)
+        return 1
+
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    session_data["tool_active"] = tool
+    session_data["updated_at"] = iso_now()
+    write_json(session_dir / "session.json", session_data)
+
+    print(f"Ferramenta definida para: {tool} (sessão {session_id})")
+    return 0
+
+
+def build_final_prompt(context_entries: List[Dict[str, Any]], prompt_text: str) -> str:
+    sections: List[str] = []
+    for entry in context_entries:
+        label = entry.get("label") or entry.get("id")
+        sections.append(f"--- {entry.get('id')} ({label}) ---\n{entry.get('content')}")
+    if sections:
+        sections.append(f"--- prompt ---\n{prompt_text}")
+        return "\n\n".join(sections)
+    return prompt_text
+
+
+def run_command(prompt_text: str) -> int:
+    prompt = prompt_text.strip()
+    if not prompt:
+        print("Erro: prompt é obrigatório.", file=sys.stderr)
+        return 1
+
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    tool = session_data.get("tool_active")
+    if not tool:
+        print("Nenhuma ferramenta selecionada. Use 'maestro use <nome>'.", file=sys.stderr)
+        return 1
+
+    context_entries, sent_entries, errors = load_active_context(session_dir)
+    if errors:
+        for err in errors:
+            print(f"Erro: {err}", file=sys.stderr)
+        return 1
+
+    counters = session_data.get("counters") or {}
+    previous_state = session_data.get("state", "iniciada")
+    current_seq = counters.get("run_seq", 0)
+    next_seq = current_seq + 1
+    run_id = f"{next_seq:04d}"
+    run_dir = session_dir / "runs" / run_id
+    run_dir.mkdir(parents=True, exist_ok=False)
+
+    now = iso_now()
+    counters["run_seq"] = next_seq
+    stats = session_data.get("stats") or {}
+    stats["runs_total"] = (stats.get("runs_total") or 0) + 1
+    session_data["counters"] = counters
+    session_data["stats"] = stats
+    session_data["state"] = "executando"
+    session_data["updated_at"] = now
+    write_json(session_dir / "session.json", session_data)
+
+    prompt_path = run_dir / "prompt.txt"
+    sent_context_path = run_dir / "sent_context.json"
+    meta_path = run_dir / "meta.json"
+    output_path = run_dir / "output.txt"
+
+    try:
+        prompt_path.write_text(prompt, encoding="utf-8")
+    except OSError:
+        print(f"Erro ao salvar prompt em {prompt_path}", file=sys.stderr)
+        return 1
+
+    write_json(sent_context_path, sent_entries)
+
+    meta: Dict[str, Any] = {
+        "id": run_id,
+        "tool": tool,
+        "prompt_source": "cli",
+        "flags": {"dry_run": False, "confirm": False},
+        "status": "pending",
+        "created_at": now,
+        "context_refs": [entry["id"] for entry in sent_entries],
+        "context_version": [{"id": entry["id"], "digest": entry.get("digest")} for entry in sent_entries],
+    }
+    write_json(meta_path, meta)
+
+    final_prompt = build_final_prompt(context_entries, prompt)
+
+    meta["status"] = "running"
+    meta["started_at"] = iso_now()
+    write_json(meta_path, meta)
+
+    print("Executando ...", flush=True)
+    tool_lower = tool.lower()
+    output_text = ""
+    error_msg: Optional[str] = None
+    status = "success"
+
+    if tool_lower in {"mock", "simulacao", "simulação"}:
+        for _ in range(4):
+            print(".", end="", flush=True)
+            time.sleep(0.5)
+        print("")
+        output_text = f"Saída simulada para: {prompt}"
+    else:
+        try:
+            tool_cmd = shlex.split(tool)
+            tool_cmd.append(final_prompt)
+            result = subprocess.run(tool_cmd, capture_output=True, text=True)
+        except FileNotFoundError:
+            error_msg = (
+                f"Ferramenta '{tool.split()[0]}' não encontrada. "
+                "Considere usar 'maestro use mock' ou verifique o PATH."
+            )
+            status = "error"
+        except Exception as exc:  # noqa: BLE001
+            error_msg = f"Falha ao executar a ferramenta '{tool}': {exc}"
+            status = "error"
+        else:
+            output_text = result.stdout or ""
+            if result.returncode != 0:
+                status = "error"
+                stderr_text = result.stderr.strip() if isinstance(result.stderr, str) else ""
+                error_msg = stderr_text or f"Ferramenta retornou código {result.returncode}."
+
+        if status == "error":
+            output_text = ""
+
+    if output_text:
+        try:
+            output_path.write_text(output_text, encoding="utf-8")
+        except OSError:
+            print(f"Erro ao salvar saída em {output_path}", file=sys.stderr)
+            status = "error"
+            error_msg = error_msg or "Falha ao persistir a saída da ferramenta."
+    else:
+        output_path.write_text("", encoding="utf-8")
+
+    finished_at = iso_now()
+    meta["finished_at"] = finished_at
+    meta["status"] = status
+
+    if status == "success":
+        output_bytes = output_text.encode("utf-8")
+        output_digest = hashlib.sha256(output_bytes).hexdigest()
+        meta["output_ref"] = {"path": "output.txt", "size": len(output_bytes), "digest": output_digest}
+    if error_msg:
+        meta["error"] = error_msg
+
+    write_json(meta_path, meta)
+
+    stats["runs_success"] = stats.get("runs_success", 0) + (1 if status == "success" else 0)
+    stats["runs_error"] = stats.get("runs_error", 0) + (1 if status == "error" else 0)
+    session_data["stats"] = stats
+    session_data["state"] = "com_saida" if status == "success" else previous_state
+    session_data["updated_at"] = finished_at
+    write_json(session_dir / "session.json", session_data)
+
+    if status == "success":
+        last_output_path = session_dir / "outputs" / "last_output.json"
+        last_output_payload = {"run_id": run_id, "path": f"../runs/{run_id}/output.txt", "timestamp": finished_at}
+        write_json(last_output_path, last_output_payload)
+        print(output_text)
+        print(f"Run {run_id} concluído. Saída salva.")
+        return 0
+
+    if error_msg:
+        print(error_msg, file=sys.stderr)
+    print(f"Run {run_id} falhou.", file=sys.stderr)
+    return 1
+
+
+import sys  # noqa: E402
+
+
+# ARQUIVO: src/maestro/cli.py
+import sys
+from typing import List
+
+from maestro.context import context_add, context_list, context_remove
+from maestro.session import list_sessions, start_session, status_session
+from maestro.tools import run_command, set_tool
+
+
+def print_usage() -> None:
+    print("Uso:", file=sys.stderr)
+    print("  maestro session start <nome>", file=sys.stderr)
+    print("  maestro session list", file=sys.stderr)
+    print("  maestro session status", file=sys.stderr)
+    print("  maestro context add <arquivo>", file=sys.stderr)
+    print("  maestro context list", file=sys.stderr)
+    print("  maestro context remove <id>", file=sys.stderr)
+    print("  maestro use <nome-da-ferramenta>", file=sys.stderr)
+    print('  maestro run "<prompt>"', file=sys.stderr)
+
+
+def main(argv: List[str]) -> int:
+    if len(argv) >= 2 and argv[0] == "session":
+        if argv[1] == "start":
+            if len(argv) < 3:
+                print("Erro: nome da sessão é obrigatório.", file=sys.stderr)
+                print_usage()
+                return 1
+            session_name = " ".join(argv[2:]).strip()
+            if not session_name:
+                print("Erro: nome da sessão é obrigatório e não pode ser vazio.", file=sys.stderr)
+                print_usage()
+                return 1
+            try:
+                session_id, session_dir = start_session(session_name)
+            except (FileExistsError, ValueError) as e:
+                print(str(e), file=sys.stderr)
+                return 1
+            print(f"Sessão criada: {session_id}")
+            print(f"Diretório: {session_dir}")
+            return 0
+        if argv[1] == "list" and len(argv) == 2:
+            return list_sessions()
+        if argv[1] == "status" and len(argv) == 2:
+            return status_session()
+    if len(argv) >= 2 and argv[0] == "context":
+        if argv[1] == "add":
+            if len(argv) < 3:
+                print("Erro: caminho do arquivo é obrigatório.", file=sys.stderr)
+                print_usage()
+                return 1
+            file_arg = argv[2]
+            return context_add(file_arg)
+        if argv[1] == "list" and len(argv) == 2:
+            return context_list()
+        if argv[1] == "remove":
+            if len(argv) < 3:
+                print("Erro: ID do item é obrigatório.", file=sys.stderr)
+                print_usage()
+                return 1
+            return context_remove(argv[2])
+    if len(argv) >= 1 and argv[0] == "use":
+        if len(argv) < 2:
+            print("Erro: nome da ferramenta é obrigatório.", file=sys.stderr)
+            print_usage()
+            return 1
+        tool_name = " ".join(argv[1:]).strip()
+        if not tool_name:
+            print("Erro: nome da ferramenta é obrigatório.", file=sys.stderr)
+            print_usage()
+            return 1
+        return set_tool(tool_name)
+    if len(argv) >= 1 and argv[0] == "run":
+        if len(argv) < 2:
+            print("Erro: prompt é obrigatório.", file=sys.stderr)
+            print_usage()
+            return 1
+        prompt_text = " ".join(argv[1:]).strip()
+        return run_command(prompt_text)
+
+    print("Comando não suportado.", file=sys.stderr)
+    print_usage()
+    return 1
+
+
+# ARQUIVO: bin/maestro
+#!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR / "src"))
+
+from maestro.cli import main  # noqa: E402
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

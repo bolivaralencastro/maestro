@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0003",
+  "kind": "file",
+  "source": {
+    "path_rel": "src/maestro/session.py",
+    "added_at": "2025-12-12T21:45:28.993548+00:00",
+    "digest": "5e72d3981425b55096a74917b51dd18d6fc2432ee04e3d65356ced368d1e914c",
+    "mtime": "2025-12-12T21:34:53.341317+00:00",
+    "size": 8695
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0003.txt",
+    "digest": "5e72d3981425b55096a74917b51dd18d6fc2432ee04e3d65356ced368d1e914c"
+  },
+  "state": "active"
+}

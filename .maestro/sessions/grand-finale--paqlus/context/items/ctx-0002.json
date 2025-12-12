@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0002",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/ORCHESTRATOR.md",
+    "added_at": "2025-12-12T22:34:12.487874+00:00",
+    "digest": "8720cce29cf08530ed61ae7914c18d02656c9fb33ad3f6e49715066e6a059033",
+    "mtime": "2025-12-12T22:29:54.626616+00:00",
+    "size": 1737
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0002.txt",
+    "digest": "8720cce29cf08530ed61ae7914c18d02656c9fb33ad3f6e49715066e6a059033"
+  },
+  "state": "active"
+}

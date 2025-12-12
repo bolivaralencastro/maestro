@@ -1,0 +1,3 @@
+Você é o QWEN. Valide o refinamento de UX.
+O feedback visual (spinner) e textual (context remove) atendem ao que você pediu?
+Se sim, declare o ciclo de UX ENCERRADO.

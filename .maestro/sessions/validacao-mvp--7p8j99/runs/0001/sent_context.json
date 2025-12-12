@@ -1,0 +1,9 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "040798e06d992e0c0d57ceaa44233bb03be4c3dc9da3cf9ea808fd0410b30781",
+    "path_rel": "README.md"
+  }
+]

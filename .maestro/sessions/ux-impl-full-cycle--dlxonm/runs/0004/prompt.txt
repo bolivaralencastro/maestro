@@ -1,0 +1,7 @@
+Você é a MISTRAL. Consolide o ciclo 'Refinamento de UX'.
+Gere a entrada Markdown para EVOLUTION.md.
+Inclua:
+- Implementação do Spinner (Threading)
+- Feedback de Context Remove
+- Validação completa dos 3 agentes.
+- Status: ENCERRADO.

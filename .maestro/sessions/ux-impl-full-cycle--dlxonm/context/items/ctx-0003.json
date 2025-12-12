@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0003",
+  "kind": "file",
+  "source": {
+    "path_rel": "src/maestro/utils.py",
+    "added_at": "2025-12-12T22:13:10.471364+00:00",
+    "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c",
+    "mtime": "2025-12-12T21:34:10.318034+00:00",
+    "size": 2619
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0003.txt",
+    "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c"
+  },
+  "state": "active"
+}

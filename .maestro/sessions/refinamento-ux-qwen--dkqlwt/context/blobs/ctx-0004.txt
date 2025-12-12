@@ -1,0 +1,199 @@
+import hashlib
+import shlex
+import subprocess
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+import sys
+
+from maestro.context import load_active_context
+from maestro.session import require_active_session
+from maestro.utils import iso_now, write_json
+
+
+def set_tool(tool_name: str) -> int:
+    tool = tool_name.strip()
+    if not tool:
+        print("Erro: nome da ferramenta é obrigatório.", file=sys.stderr)
+        return 1
+
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    session_data["tool_active"] = tool
+    session_data["updated_at"] = iso_now()
+    write_json(session_dir / "session.json", session_data)
+
+    print(f"Ferramenta definida para: {tool} (sessão {session_id})")
+    return 0
+
+
+def build_final_prompt(context_entries: List[Dict[str, Any]], prompt_text: str) -> str:
+    sections: List[str] = []
+    for entry in context_entries:
+        label = entry.get("label") or entry.get("id")
+        sections.append(f"--- {entry.get('id')} ({label}) ---\n{entry.get('content')}")
+    if sections:
+        sections.append(f"--- prompt ---\n{prompt_text}")
+        return "\n\n".join(sections)
+    return prompt_text
+
+
+def run_command(prompt_text: str) -> int:
+    prompt = prompt_text.strip()
+    if not prompt:
+        print("Erro: prompt é obrigatório.", file=sys.stderr)
+        return 1
+
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    tool = session_data.get("tool_active")
+    if not tool:
+        print("Nenhuma ferramenta selecionada. Use 'maestro use <nome>'.", file=sys.stderr)
+        return 1
+
+    context_entries, sent_entries, errors = load_active_context(session_dir)
+    if errors:
+        for err in errors:
+            print(f"Erro: {err}", file=sys.stderr)
+        return 1
+
+    counters = session_data.get("counters") or {}
+    previous_state = session_data.get("state", "iniciada")
+    current_seq = counters.get("run_seq", 0)
+    next_seq = current_seq + 1
+    run_id = f"{next_seq:04d}"
+    run_dir = session_dir / "runs" / run_id
+    run_dir.mkdir(parents=True, exist_ok=False)
+
+    now = iso_now()
+    counters["run_seq"] = next_seq
+    stats = session_data.get("stats") or {}
+    stats["runs_total"] = (stats.get("runs_total") or 0) + 1
+    session_data["counters"] = counters
+    session_data["stats"] = stats
+    session_data["state"] = "executando"
+    session_data["updated_at"] = now
+    write_json(session_dir / "session.json", session_data)
+
+    prompt_path = run_dir / "prompt.txt"
+    sent_context_path = run_dir / "sent_context.json"
+    meta_path = run_dir / "meta.json"
+    output_path = run_dir / "output.txt"
+
+    try:
+        prompt_path.write_text(prompt, encoding="utf-8")
+    except OSError:
+        print(f"Erro ao salvar prompt em {prompt_path}", file=sys.stderr)
+        return 1
+
+    write_json(sent_context_path, sent_entries)
+
+    meta: Dict[str, Any] = {
+        "id": run_id,
+        "tool": tool,
+        "prompt_source": "cli",
+        "flags": {"dry_run": False, "confirm": False},
+        "status": "pending",
+        "created_at": now,
+        "context_refs": [entry["id"] for entry in sent_entries],
+        "context_version": [{"id": entry["id"], "digest": entry.get("digest")} for entry in sent_entries],
+    }
+    write_json(meta_path, meta)
+
+    final_prompt = build_final_prompt(context_entries, prompt)
+
+    meta["status"] = "running"
+    meta["started_at"] = iso_now()
+    write_json(meta_path, meta)
+
+    print("Executando ...", flush=True)
+    tool_lower = tool.lower()
+    output_text = ""
+    error_msg: Optional[str] = None
+    status = "success"
+
+    if tool_lower in {"mock", "simulacao", "simulação"}:
+        for _ in range(4):
+            print(".", end="", flush=True)
+            time.sleep(0.5)
+        print("")
+        output_text = f"Saída simulada para: {prompt}"
+    else:
+        try:
+            tool_cmd = shlex.split(tool)
+            # Removemos o append e usamos input
+            result = subprocess.run(
+                tool_cmd,
+                input=final_prompt,
+                capture_output=True,
+                text=True
+            )
+        except FileNotFoundError:
+            error_msg = (
+                f"Ferramenta '{tool.split()[0]}' não encontrada. "
+                "Considere usar 'maestro use mock' ou verifique o PATH."
+            )
+            status = "error"
+        except Exception as exc:  # noqa: BLE001
+            error_msg = f"Falha ao executar a ferramenta '{tool}': {exc}"
+            status = "error"
+        else:
+            output_text = result.stdout or ""
+            if result.returncode != 0:
+                status = "error"
+                stderr_text = result.stderr.strip() if isinstance(result.stderr, str) else ""
+                error_msg = stderr_text or f"Ferramenta retornou código {result.returncode}."
+
+        if status == "error":
+            output_text = ""
+
+    if output_text:
+        try:
+            output_path.write_text(output_text, encoding="utf-8")
+        except OSError:
+            print(f"Erro ao salvar saída em {output_path}", file=sys.stderr)
+            status = "error"
+            error_msg = error_msg or "Falha ao persistir a saída da ferramenta."
+    else:
+        output_path.write_text("", encoding="utf-8")
+
+    finished_at = iso_now()
+    meta["finished_at"] = finished_at
+    meta["status"] = status
+
+    if status == "success":
+        output_bytes = output_text.encode("utf-8")
+        output_digest = hashlib.sha256(output_bytes).hexdigest()
+        meta["output_ref"] = {"path": "output.txt", "size": len(output_bytes), "digest": output_digest}
+    if error_msg:
+        meta["error"] = error_msg
+
+    write_json(meta_path, meta)
+
+    stats["runs_success"] = stats.get("runs_success", 0) + (1 if status == "success" else 0)
+    stats["runs_error"] = stats.get("runs_error", 0) + (1 if status == "error" else 0)
+    session_data["stats"] = stats
+    session_data["state"] = "com_saida" if status == "success" else previous_state
+    session_data["updated_at"] = finished_at
+    write_json(session_dir / "session.json", session_data)
+
+    if status == "success":
+        last_output_path = session_dir / "outputs" / "last_output.json"
+        last_output_payload = {"run_id": run_id, "path": f"../runs/{run_id}/output.txt", "timestamp": finished_at}
+        write_json(last_output_path, last_output_payload)
+        print(output_text)
+        print(f"Run {run_id} concluído. Saída salva.")
+        return 0
+
+    if error_msg:
+        print(error_msg, file=sys.stderr)
+    print(f"Run {run_id} falhou.", file=sys.stderr)
+    return 1

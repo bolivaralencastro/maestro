@@ -1,0 +1,27 @@
+{
+  "id": "0001",
+  "tool": "mock",
+  "prompt_source": "cli",
+  "flags": {
+    "dry_run": false,
+    "confirm": false
+  },
+  "status": "success",
+  "created_at": "2025-12-12T20:39:20.312275+00:00",
+  "context_refs": [
+    "ctx-0001"
+  ],
+  "context_version": [
+    {
+      "id": "ctx-0001",
+      "digest": "040798e06d992e0c0d57ceaa44233bb03be4c3dc9da3cf9ea808fd0410b30781"
+    }
+  ],
+  "started_at": "2025-12-12T20:39:20.314392+00:00",
+  "finished_at": "2025-12-12T20:39:22.420394+00:00",
+  "output_ref": {
+    "path": "output.txt",
+    "size": 42,
+    "digest": "3a2b21b6d6ca630e61f73bef69019616626a3a2f2020e6dc996c30e3e4a7fce3"
+  }
+}

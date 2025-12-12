@@ -1,0 +1,3 @@
+Você é o QWEN. Leia o STATUS.md.
+Confirme se a UX atual (Spinner + Feedback) é digna de um MVP Premium.
+Responda curto: 'QWEN: [Status] - [Frase sobre a experiência]'

@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0003",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/logs/2025-12-12_183700__CODEX__refactor-modularization_IMPLEMENTATION.md",
+    "added_at": "2025-12-12T22:01:20.392960+00:00",
+    "digest": "aaaf2608962d9767ac9d45dfd92776823fe1e3d511c2284c8e77a2adbac87cf1",
+    "mtime": "2025-12-12T21:51:24.209413+00:00",
+    "size": 2772
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0003.txt",
+    "digest": "aaaf2608962d9767ac9d45dfd92776823fe1e3d511c2284c8e77a2adbac87cf1"
+  },
+  "state": "active"
+}

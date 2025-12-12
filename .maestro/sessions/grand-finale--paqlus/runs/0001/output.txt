@@ -1,0 +1,1 @@
+CODEX: Não pronto - Código elegante, mas não hiberna sem stop/resume e testes cobrindo o sono.

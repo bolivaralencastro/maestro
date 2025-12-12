@@ -1,0 +1,526 @@
+--- ctx-0006 (EVOLUTION.md) ---
+# EVOLUTION.md — Histórico do Projeto Maestro
+
+**Nota:** Para status atual do projeto, consulte [STATUS.md](docs/STATUS.md). Para próximas tarefas e backlog, consulte [BACKLOG.md](docs/BACKLOG.md).
+
+Este documento consolida a evolução histórica do projeto Maestro, baseado nos logs de desenvolvimento encontrados em `docs/logs`.
+
+## Linha do Tempo
+
+### 2025-12-12 13:34 — Implementação do Comando `context add`
+
+**Arquivo:** `docs/logs/2025-12-12_133440__CODEX__context-add_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro context add` para ingestão de arquivos locais
+- Validação de sessão ativa e bloqueio de sessões finalizadas
+- Fluxo de ingestão com cálculo de SHA-256, captura de metadados e geração de snapshots imutáveis
+- Geração sequencial de IDs `ctx-XXXX` e persistência em `context/blobs/` e `context/items/`
+- Atualização de `context/active.json` e `session.json` com preservação de estado
+
+**Objetivo:** Permitir a adição de arquivos ao contexto da sessão ativa com garantia de imutabilidade e rastreabilidade.
+
+**Próximos passos:** Revisão pela Gemini para validação de integridade e conformidade.
+
+---
+
+### 2025-12-12 16:40 — Revisão do `context add`
+
+**Arquivo:** `docs/logs/2025-12-12_164027__GEMINI__context-add_REVIEW.md`
+
+**Verdito:** Aprovado
+
+**Análise:**
+- Integridade referencial validada (sessão ativa e bloqueio de sessões finalizadas)
+- Imutabilidade garantida (snapshot salvo antes dos metadados, hash SHA-256 calculado corretamente)
+- Estrutura de pastas aderente ao `STORAGE_LAYOUT.md`
+- Consistência de estado assegurada (contador `ctx_seq` e atualização aditiva de `context/active.json`)
+
+**Conclusão:** Implementação robusta e segura, aderente ao contrato de armazenamento.
+
+**Próximos passos:** Refinamento pela Qwen para avaliação de UX e casos de borda.
+
+---
+
+### 2025-12-12 17:11 — Refinamento do `context add`
+
+**Arquivo:** `docs/logs/2025-12-12_171122__QWEN__context-add_REFINEMENT.md`
+
+**Verdito:** MVP Adequado
+
+**Sugestões para Backlog:**
+- Suporte a múltiplos arquivos e padrões (globs)
+- Tratamento de arquivos binários (detecção e aviso)
+- Limite de tamanho de arquivo (ex: 10MB)
+- Melhoria nas mensagens de confirmação (detalhes adicionais)
+
+**Conclusão:** MVP funcional e seguro, com oportunidades de melhoria identificadas para versões futuras.
+
+**Próximos passos:** Aplicação dos ajustes pela Codex em ciclos futuros.
+
+---
+
+### 2025-12-12 17:11 — Implementação do Comando `context list`
+
+**Arquivo:** `docs/logs/2025-12-12_152647__CODEX__context-list_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro context list` para visualização de itens do contexto ativo
+- Validações de existência de `.maestro/`, sessão ativa e bloqueio de sessão finalizada
+- Leitura do contexto ativo a partir de `context/active.json` e resolução de metadados por item
+- Formatação de saída com ID, tipo, origem, tamanho humanizado e hash abreviado
+- Tratamento de contexto vazio e metadados ausentes
+
+**Objetivo:** Permitir a visualização dos itens do contexto da sessão ativa com informações essenciais.
+
+**Próximos passos:** Revisão pela Gemini para validação de segurança e cobertura de casos de borda.
+
+---
+
+### 2025-12-12 16:45 — Revisão do `context list`
+
+**Arquivo:** `docs/logs/2025-12-12_164500__GEMINI__context-list_REVIEW.md`
+
+**Verdito:** ✅ APROVADO
+
+**Análise:**
+- Implementação segura e estritamente read-only
+- Aderência completa às especificações em `3-COMMANDS.md` e `4-STORAGE_LAYOUT.md`
+- Integridade referencial bem gerenciada com tratamento de referências quebradas
+- Consistência de estado assegurada com validações adequadas
+- Casos de borda tratados: `.maestro/` ausente, sessão ativa ausente, sessão finalizada, contexto vazio, metadados ausentes/corrompidos
+
+**Débito Técnico:** ⚠️ Duplicação de código na validação de sessão ativa (deve reutilizar `require_active_session()`)
+
+**Conclusão:** Implementação robusta e segura, aderente ao contrato de armazenamento, com pequeno débito técnico identificado.
+
+**Próximos passos:** Refinamento pela Qwen para avaliação de UX e oportunidades de melhoria.
+
+---
+
+### 2025-12-12 17:11 — Refinamento do `context list`
+
+**Arquivo:** `docs/logs/2025-12-12_171122__QWEN__context-list_REFINEMENT.md`
+
+**Verdito:** MVP Adequado
+
+**Pontos Positivos:**
+- Mensagens de erro claras e orientadas a ação
+- Formato de saída legível com informações úteis (ID, tipo, origem, tamanho, hash)
+- Tratamento adequado de contexto vazio e casos de borda
+
+**Backlog Identificado:**
+- **Alta Prioridade:** Remover duplicação de código (usar `require_active_session()`)
+- **Média Prioridade:** Flags/paginação/filtros, ordenação personalizada, data/hora de adição
+- **Baixa Prioridade:** Busca/agrupamento, exportação JSON, formato compacto/verbose
+
+**Conclusão:** MVP funcional e seguro, com oportunidades de melhoria identificadas para versões futuras.
+
+**Próximos passos:** Aplicação dos ajustes pela Codex em ciclos futuros.
+
+---
+
+### 2025-12-12 16:17 — Implementação do Comando `context remove`
+
+**Arquivo:** `docs/logs/2025-12-12_161746__CODEX__context-remove_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro context remove <id>` para remoção de itens do contexto ativo
+- Adoção de soft delete: marcação de `state: removed` e `removed_at` no metadado do item
+- Remoção do ID da lista ativa em `context/active.json` e atualização de `session.json`
+- Atualização do estado da sessão para `iniciada` quando o contexto fica vazio
+- Mensagens de erro e sucesso consistentes com o padrão da CLI
+
+**Objetivo:** Permitir a remoção de itens do contexto da sessão ativa com garantia de auditabilidade e preservação de dados.
+
+**Próximos passos:** Revisão pela Gemini para validação de segurança e conformidade.
+
+---
+
+### 2025-12-12 16:28 — Revisão do `context remove`
+
+**Arquivo:** `docs/logs/2025-12-12_162826__GEMINI__context-remove_REVIEW.md`
+
+**Verdito:** ✅ APROVADO
+
+**Análise:**
+- **Segurança:** Validações adequadas, sem hard delete, preservação de arquivos físicos
+- **Aderência:** Segue `4-STORAGE_LAYOUT.md` e `3-COMMANDS.md`
+- **Integridade:** Preserva histórico e arquivos físicos, atualiza timestamps corretamente
+- **Consistência:** Atualiza estado da sessão corretamente, trata casos de borda
+
+**Conclusão:** Implementação robusta e segura, aderente ao contrato de armazenamento.
+
+**Próximos passos:** Refinamento pela Qwen para avaliação de UX e oportunidades de melhoria.
+
+---
+
+### 2025-12-12 16:29 — Refinamento do `context remove`
+
+**Arquivo:** `docs/logs/2025-12-12_162945__QWEN__context-remove_REFINEMENT.md`
+
+**Verdito:** MVP Adequado
+
+**Pontos Positivos:**
+- Mensagens de erro claras e orientadas a ação
+- Soft delete implementado corretamente, preservando dados para auditabilidade
+- Tratamento adequado de casos de borda
+
+**Backlog Identificado:**
+- **Alta Prioridade:** Implementar confirmação opcional para remoção
+- **Média Prioridade:** Listar itens removidos (`--removed`), desfazer remoção, hard delete (`cleanup`)
+- **Baixa Prioridade:** Remover múltiplos itens, confirmação de remoção
+
+**Conclusão:** MVP funcional e seguro, com oportunidades de melhoria identificadas para versões futuras.
+
+**Próximos passos:** Aplicação dos ajustes pela Codex em ciclos futuros.
+
+---
+
+### 2025-12-12 16:56 — Implementação do Comando `use`
+
+**Arquivo:** `docs/logs/2025-12-12_135857__CODEX__use-tool_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro use` para seleção de ferramenta ativa na sessão
+- Validação de sessão ativa e bloqueio de sessões finalizadas
+- Atualização do campo `tool_active` no `session.json` com a ferramenta selecionada
+- Mensagens de erro e sucesso consistentes com o padrão da CLI
+
+**Objetivo:** Permitir a seleção de ferramentas ativas para uso na sessão.
+
+**Próximos passos:** Revisão pela Gemini para validação de segurança e conformidade.
+
+---
+
+### 2025-12-12 16:56 — Revisão do `use`
+
+**Arquivo:** `docs/logs/2025-12-12_165627__GEMINI__use-tool_REVIEW.md`
+
+**Verdito:** ✅ APROVADO
+
+**Análise:**
+- Implementação segura e aderente às especificações em `3-COMMANDS.md` e `4-STORAGE_LAYOUT.md`
+- Validações adequadas para sessão ativa e bloqueio de sessões finalizadas
+- Atualização correta do campo `tool_active` no `session.json`
+- Mensagens de erro e sucesso claras e orientadas a ação
+
+**Conclusão:** Implementação robusta e segura, aderente ao contrato de armazenamento.
+
+**Próximos passos:** Refinamento pela Qwen para avaliação de UX e oportunidades de melhoria.
+
+---
+
+### 2025-12-12 17:15 — Implementação do Comando `run`
+
+**Arquivo:** `docs/logs/2025-12-12_171535__CODEX__run_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro run` para execução de ferramentas com contexto ativo
+- Validação de sessão ativa, ferramenta ativa e contexto não vazio
+- Persistência robusta em `runs/NNNN` com snapshot de contexto (`sent_context.json`)
+- Execução segura via subprocess (sem shell) com captura de saída e código de retorno
+- Atualização do `session.json` com `last_run_id` e `last_output`
+
+**Objetivo:** Permitir a execução de ferramentas (ou mocks) com contexto ativo e persistência de resultados.
+
+**Próximos passos:** Revisão pela Gemini para validação de segurança e conformidade.
+
+---
+
+### 2025-12-12 17:20 — Revisão do `run`
+
+**Arquivo:** `docs/logs/2025-12-12_172000__GEMINI__run_REVIEW.md`
+
+**Verdito:** ✅ APROVADO
+
+**Análise:**
+- Implementação segura e aderente às especificações em `3-COMMANDS.md` e `4-STORAGE_LAYOUT.md`
+- Validações adequadas para sessão ativa, ferramenta ativa e contexto não vazio
+- Persistência robusta em `runs/NNNN` com snapshot de contexto e metadados completos
+- Execução segura via subprocess (sem shell) com captura de saída e código de retorno
+
+**Conclusão:** Implementação robusta e segura, aderente ao contrato de armazenamento.
+
+**Próximos passos:** Refinamento pela Qwen para avaliação de UX e oportunidades de melhoria.
+
+---
+
+### 2025-12-12 17:19 — Refinamento do `run`
+
+**Arquivo:** `docs/logs/2025-12-12_171900__QWEN__run_REFINEMENT.md`
+
+**Verdito:** MVP Adequado (Backlog UX)
+
+**Pontos Positivos:**
+- Persistência robusta em `runs/NNNN` com snapshot de contexto e metadados completos
+- Execução segura via subprocess (sem shell) com captura de saída e código de retorno
+- Atualização correta do `session.json` com `last_run_id` e `last_output`
+
+**Backlog Identificado (UX):**
+- **Alta Prioridade:** Tratamento de Ctrl+C (Graceful exit), timeout configurável
+- **Média Prioridade:** Feedback visual de envio de contexto, streaming de resposta, pré-visualização de contexto
+- **Baixa Prioridade:** Melhorias na exibição de saída e mensagens de erro, suporte a Markdown
+
+**Conclusão:** MVP funcional e seguro, com oportunidades de melhoria identificadas para versões futuras. UX marcada para refinamento futuro (streaming, ctrl+c).
+
+**Próximos passos:** Aplicação dos ajustes pela Codex em ciclos futuros.
+
+---
+
+### 2025-12-12 20:17 — Refatoração do `context list`
+
+**Arquivo:** `docs/logs/2025-12-12_201702__QWEN__context-list-refactor_REFINEMENT.md`
+
+**O que foi feito:**
+- Refatoração da função `context_list` para reutilizar `require_active_session`
+- Remoção completa de duplicação de código na validação de sessão ativa
+- Centralização da lógica de validação em `require_active_session`
+
+**Objetivo:** Eliminar duplicação de código e melhorar a manutenibilidade do projeto.
+
+**Resultados:**
+- **Duplicação Eliminada:** A lógica de validação de sessão ativa foi centralizada em `require_active_session`, removendo a duplicação presente em `context_list`.
+- **Comportamento Preservado:** Testes confirmaram que o comportamento do comando `context list` permaneceu inalterado, com saídas idênticas antes e depois da refatoração.
+- **Qualidade do Código:** Melhoria significativa na qualidade do código, com maior legibilidade e aderência ao princípio DRY (Don't Repeat Yourself).
+
+**Verdito:** Refatoração Bem-Sucedida
+
+**Conclusão:** A refatoração foi bem-sucedida, atendendo a todos os critérios estabelecidos. O débito técnico foi pago, a qualidade do código melhorou e não foram introduzidos novos problemas. A funcionalidade foi mantida e a manutenibilidade aumentou.
+
+**Próximos passos:** Continuar a aplicar os mesmos princípios de refatoração em outras partes do código onde houver duplicação de lógica.
+
+---
+
+### 2025-12-12 08:30 — Bootstrap do Projeto
+
+**Arquivo:** `docs/logs/2025-12-12_083000__CODEX__bootstrap_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Criação da estrutura inicial do projeto (pastas `bin/` e `src/`)
+- Implementação do entry point executável `maestro`
+- Criação de um README mínimo
+
+**Objetivo:** Estabelecer a base estrutural do projeto para desenvolvimento futuro.
+
+**Próximos passos:** Revisão pela Gemini para validação da aderência estrutural.
+
+---
+
+### 2025-12-12 10:00 — Implementação do Comando `session start`
+
+**Arquivo:** `docs/logs/2025-12-12_100000__CODEX__session-start_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro session start`
+- Criação automática da pasta `.maestro` para armazenamento de dados
+- Geração dos arquivos `session.json`, `index.json` e `active`
+
+**Objetivo:** Permitir o início de sessões de trabalho com persistência de estado.
+
+**Próximos passos:** Revisão pela Gemini para validação conceitual.
+
+---
+
+### 2025-12-12 10:10 — Revisão do `session start`
+
+**Arquivo:** `docs/logs/2025-12-12_101000__GEMINI__session-start_REVIEW.md`
+
+**Observações:**
+- Implementação aderente ao modelo proposto
+- Baixo risco de race conditions identificado
+- Parsing manual de dados pode gerar retrabalho futuro
+
+**Aprendizado:** A implementação inicial atende aos requisitos, mas pode ser otimizada para reduzir trabalho manual.
+
+**Próximos passos:** Refinamento pela Qwen para simplificação e aumento de robustez.
+
+---
+
+### 2025-12-12 10:20 — Refinamento do `session start`
+
+**Arquivo:** `docs/logs/2025-12-12_102000__QWEN__session-start_REFINEMENT.md`
+
+**Sugestões implementadas:**
+- Adição de validação de nome de sessão
+- Implementação de criação atômica de arquivos para evitar corrupção
+- Simplificação da estrutura do `index.json`
+
+**Objetivo:** Aumentar a robustez e confiabilidade do comando.
+
+**Próximos passos:** Aplicação dos ajustes pela Codex.
+
+---
+
+### 2025-12-12 10:30 — Implementação do Comando `session list`
+
+**Arquivo:** `docs/logs/2025-12-12_103000__CODEX__session-list_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Implementação do comando `maestro session list`
+- Leitura do arquivo `index.json` para exibição de sessões
+- Sem escrita em disco (operacionalmente seguro)
+
+**Objetivo:** Permitir visualização das sessões existentes sem modificar o estado.
+
+**Próximos passos:** Revisão pela Gemini para validação da fonte da verdade.
+
+---
+
+### 2025-12-12 10:40 — Revisão do `session list`
+
+**Arquivo:** `docs/logs/2025-12-12_104000__GEMINI__session-list_REVIEW.md`
+
+**Pontos identificados:**
+- Ambiguidade na fonte canônica do estado das sessões
+- Precedência da sessão ativa não claramente definida
+
+**Aprendizado:** Necessidade de estabelecer claramente a hierarquia de fontes de dados para evitar inconsistências.
+
+**Próximos passos:** Proposta de ajustes pela Qwen.
+
+---
+
+### 2025-12-12 10:50 — Refinamento do `session list`
+
+**Arquivo:** `docs/logs/2025-12-12_105000__QWEN__session-list_REFINEMENT.md`
+
+**Decisões arquiteturais:**
+- `session.json` estabelecido como fonte canônica de dados
+- `sessions/active` definido como ponteiro canônico para a sessão ativa
+- `index.json` utilizado como cache para otimização de performance
+
+**Status:** Comando considerado fechado e pronto para uso.
+
+**Próximos passos:** Aplicação dos ajustes finais pela Codex.
+
+---
+
+## Resumo da Evolução
+
+O projeto Maestro iniciou com uma estrutura básica e evoluiu rapidamente para um sistema de gerenciamento de sessões com:
+
+1. **Estrutura inicial** (08:30) — Base do projeto estabelecida
+2. **Sessões iniciáveis** (10:00) — Capacidade de criar e persistir sessões
+3. **Robustez aumentada** (10:20) — Validações e operações atômicas
+4. **Visualização de sessões** (10:30) — Capacidade de listar sessões existentes
+5. **Arquitetura consolidada** (10:50) — Hierarquia clara de fontes de dados
+6. **Status de sessões** (12:39) — Comando `maestro session status` fechado no MVP-0
+7. **Ingestão de contexto** (17:11) — Comando `maestro context add` funcional e seguro
+8. **Seleção de ferramenta** (16:56) — Comando `maestro use` funcional e seguro
+9. **Execução de ferramentas** (17:15) — Comando `maestro run` funcional e seguro
+10. **Validação MVP** (17:35) — Teste ponta-a-ponta (`start` -> `add` -> `use` -> `run`) com sucesso total em 12/12/2025
+
+## Lições Aprendidas
+
+- **Iteração rápida:** O ciclo de implementação-revisão-refinamento permitiu evolução rápida com validação contínua
+- **Clareza arquitetural:** A definição explícita de fontes canônicas de dados é crucial para evitar ambiguidades
+- **Robustez:** Validações e operações atômicas são essenciais para sistemas de persistência
+- **Colaboração:** A revisão por diferentes agentes (Codex, Gemini, Qwen) trouxe perspectivas complementares
+- **MVP disciplinado:** O fechamento do `session status` no MVP-0 demonstra a importância de entregar valor mínimo viável antes de refinamentos
+- **Refatoração contínua:** A remoção de duplicação de código e a centralização de lógica em funções reutilizáveis melhoram significativamente a manutenibilidade e a qualidade do código, como demonstrado na refatoração do `context list`
+- **Gestão de Ciclo de Vida de Processos:** Baseada no relatório do Orquestrador, a importância de timeboxing e auditoria de uso para otimizar recursos e garantir a qualidade do processo de desenvolvimento
+
+
+
+## [2025-12-12] Refatoração: Modularização Monólito -> Pacote
+**Autor:** CODEX (Via Orquestração Multi-Agente)
+**Descrição:** O script monolítico `bin/maestro` foi refatorado em um pacote Python estruturado (`src/maestro/`), dividido em módulos (`utils`, `session`, `context`, `tools`, `cli`).
+**Processo:** A refatoração foi realizada utilizando o próprio Maestro (`dogfooding`), onde a IA (Codex) leu o código fonte, gerou a estrutura modular, e o Orquestrador aplicou as mudanças.
+**Melhorias:**
+- **Arquitetura:** Separação clara de responsabilidades.
+- **Robustez:** Correção crítica no envio de prompts via STDIN para suportar grandes cargas.
+- **Manutenibilidade:** Código preparado para crescimento e testes.
+**Links:**
+- [Log de Implementação](docs/logs/2025-12-12_183700__CODEX__refactor-modularization_IMPLEMENTATION.md)
+
+---
+
+### 2025-12-12 18:37 — Refatoração: Modularização Monólito -> Pacote
+
+**Arquivo:** `docs/logs/2025-12-12_183700__CODEX__refactor-modularization_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- Refatoração do script monolítico `bin/maestro` em um pacote Python modular (`src/maestro/`)
+- Divisão em módulos: `utils.py`, `session.py`, `context.py`, `tools.py`, `cli.py`
+- Correção crítica no envio de prompts via STDIN para suportar grandes cargas
+- Uso de dogfooding: a refatoração foi realizada utilizando o próprio Maestro
+
+**Objetivo:** Melhorar a manutenibilidade, facilitar a adição de novos comandos e preparar o código para testes unitários.
+
+**Próximos passos:** Revisão pela Gemini para validação de integridade da modularização.
+
+---
+
+### 2025-12-12 18:47 — Revisão da Modularização
+
+**Arquivo:** `docs/logs/2025-12-12_184700__GEMINI__refactor-modularization_REVIEW.md`
+
+**Verdito:** ✅ APROVADO
+
+**Análise:**
+- Arquitetura modular bem-sucedida com divisão clara de responsabilidades
+- Funcionalidade preservada e corretamente distribuída pelos módulos
+- Implementação segura de subprocessos com uso adequado de `shlex.split` e `subprocess.run`
+- Soft delete implementado corretamente no `context_remove`
+
+**Conclusão:** Implementação robusta e segura, aderente ao contrato de armazenamento.
+
+**Próximos passos:** Refinamento pela Qwen para avaliação de UX e oportunidades de melhoria.
+
+---
+
+### 2025-12-12 18:52 — Refinamento da Modularização
+
+**Arquivo:** `docs/logs/2025-12-12_185200__QWEN__refactor-modularization_REFINEMENT.md`
+
+**Verdito:** REQUER REFINAMENTO
+
+**Pontos Positivos:**
+- Arquitetura modular bem-sucedida
+- Funcionalidade preservada e corretamente distribuída pelos módulos
+- Implementação segura de subprocessos
+
+**Backlog Identificado (UX):**
+- **Alta Prioridade:** Feedback visual de execução (spinner), mensagens de confirmação detalhadas
+- **Média Prioridade:** Suporte a cores ANSI para sucesso/erro
+- **Baixa Prioridade:** Melhorias na exibição de saída e mensagens de erro
+
+**Conclusão:** MVP funcional e seguro, com oportunidades de melhoria identificadas para versões futuras.
+
+**Próximos passos:** Aplicação dos ajustes pela Codex em ciclos futuros.
+
+---
+
+## Resumo da Evolução
+
+O projeto Maestro iniciou com uma estrutura básica e evoluiu rapidamente para um sistema de gerenciamento de sessões com:
+
+1. **Estrutura inicial** (08:30) — Base do projeto estabelecida
+2. **Sessões iniciáveis** (10:00) — Capacidade de criar e persistir sessões
+3. **Robustez aumentada** (10:20) — Validações e operações atômicas
+4. **Visualização de sessões** (10:30) — Capacidade de listar sessões existentes
+5. **Arquitetura consolidada** (10:50) — Hierarquia clara de fontes de dados
+6. **Status de sessões** (12:39) — Comando `maestro session status` fechado no MVP-0
+7. **Ingestão de contexto** (17:11) — Comando `maestro context add` funcional e seguro
+8. **Seleção de ferramenta** (16:56) — Comando `maestro use` funcional e seguro
+9. **Execução de ferramentas** (17:15) — Comando `maestro run` funcional e seguro
+10. **Validação MVP** (17:35) — Teste ponta-a-ponta (`start` -> `add` -> `use` -> `run`) com sucesso total em 12/12/2025
+11. **Refatoração modular** (18:37) — Transformação do script monolítico em pacote Python modular, com uso de dogfooding
+
+## Lições Aprendidas
+
+- **Iteração rápida:** O ciclo de implementação-revisão-refinamento permitiu evolução rápida com validação contínua
+- **Clareza arquitetural:** A definição explícita de fontes canônicas de dados é crucial para evitar ambiguidades
+- **Robustez:** Validações e operações atômicas são essenciais para sistemas de persistência
+- **Colaboração:** A revisão por diferentes agentes (Codex, Gemini, Qwen) trouxe perspectivas complementares
+- **MVP disciplinado:** O fechamento do `session status` no MVP-0 demonstra a importância de entregar valor mínimo viável antes de refinamentos
+- **Refatoração contínua:** A remoção de duplicação de código e a centralização de lógica em funções reutilizáveis melhoram significativamente a manutenibilidade e a qualidade do código, como demonstrado na refatoração do `context list`
+- **Gestão de Ciclo de Vida de Processos:** Baseada no relatório do Orquestrador, a importância de timeboxing e auditoria de uso para otimizar recursos e garantir a qualidade do processo de desenvolvimento
+- **Dogfooding:** A capacidade do Maestro de se auto-modificar foi comprovada com sucesso, demonstrando a maturidade do projeto
+
+## Status Final do Ciclo
+
+**CONCLUÍDO COM REFINAMENTOS PENDENTES**
+
+A refatoração modular foi concluída com sucesso, resultando em uma base de código mais limpa, segura e manutenível. No entanto, foram identificadas oportunidades de melhoria na experiência do usuário (UX), que serão abordadas em ciclos futuros.

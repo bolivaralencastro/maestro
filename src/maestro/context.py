@@ -1,0 +1,335 @@
+import hashlib
+import json
+import re
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+from maestro.session import require_active_session
+from maestro.utils import (
+    ROOT_DIR,
+    format_size,
+    iso_now,
+    read_json,
+    short_digest,
+    write_json,
+)
+
+
+def context_add(file_arg: str) -> int:
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    target_path = Path(file_arg)
+    if not target_path.is_absolute():
+        target_path = (Path.cwd() / target_path).resolve()
+    if not target_path.exists() or not target_path.is_file():
+        print(f"Arquivo não encontrado ou não é um arquivo legível: {file_arg}", file=sys.stderr)
+        return 1
+
+    try:
+        content = target_path.read_bytes()
+    except OSError:
+        print(f"Não foi possível ler o arquivo: {file_arg}", file=sys.stderr)
+        return 1
+
+    digest = hashlib.sha256(content).hexdigest()
+    stat = target_path.stat()
+    mtime = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
+    size = stat.st_size
+    now = iso_now()
+
+    try:
+        path_rel = str(target_path.relative_to(ROOT_DIR))
+    except ValueError:
+        path_rel = str(target_path)
+
+    counters = session_data.get("counters") or {}
+    current_seq = counters.get("ctx_seq", 0)
+    next_seq = current_seq + 1
+    ctx_id = f"ctx-{next_seq:04d}"
+
+    blobs_dir = session_dir / "context" / "blobs"
+    items_dir = session_dir / "context" / "items"
+    active_path = session_dir / "context" / "active.json"
+
+    blob_path = blobs_dir / f"{ctx_id}.txt"
+    try:
+        blob_path.write_bytes(content)
+    except OSError:
+        print(f"Falha ao salvar snapshot do arquivo em {blob_path}", file=sys.stderr)
+        return 1
+
+    item_data = {
+        "id": ctx_id,
+        "kind": "file",
+        "source": {
+            "path_rel": path_rel,
+            "added_at": now,
+            "digest": digest,
+            "mtime": mtime,
+            "size": size,
+        },
+        "snapshot": {
+            "blob": f"../blobs/{ctx_id}.txt",
+            "digest": digest,
+        },
+        "state": "active",
+    }
+
+    write_json(items_dir / f"{ctx_id}.json", item_data)
+
+    active_data = read_json(active_path, {"items": []})
+    items_list = active_data.get("items") or []
+    items_list.append(ctx_id)
+    active_data["items"] = items_list
+    write_json(active_path, active_data)
+
+    counters["ctx_seq"] = next_seq
+    session_data["counters"] = counters
+    if session_data.get("state") in (None, "iniciada", "com_contexto"):
+        session_data["state"] = "com_contexto"
+    session_data["updated_at"] = now
+    write_json(session_dir / "session.json", session_data)
+
+    print(f"Contexto adicionado: {ctx_id} (sessão {session_id})")
+    return 0
+
+
+def context_list() -> int:
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    slug = session_data.get("slug", session_id)
+    context_dir = session_dir / "context"
+    active_path = context_dir / "active.json"
+    try:
+        with active_path.open("r", encoding="utf-8") as f:
+            active_data = json.load(f)
+    except FileNotFoundError:
+        active_data = {}
+    except json.JSONDecodeError:
+        print(f"Arquivo de contexto ativo corrompido: {active_path}", file=sys.stderr)
+        return 1
+    except OSError:
+        print(f"Não foi possível ler o contexto ativo: {active_path}", file=sys.stderr)
+        return 1
+
+    items_list = active_data.get("items") if isinstance(active_data, dict) else None
+    if not isinstance(items_list, list):
+        items_list = []
+
+    if not items_list:
+        print("Contexto vazio. Use 'maestro context add <arquivo>' para adicionar itens")
+        return 0
+
+    print(f"Contexto da sessão '{slug}' ({len(items_list)} itens):")
+    items_dir = context_dir / "items"
+    blobs_dir = context_dir / "blobs"
+
+    for raw_id in items_list:
+        item_id = raw_id if isinstance(raw_id, str) else str(raw_id)
+        meta_path = items_dir / f"{item_id}.json"
+        if not meta_path.exists():
+            print(f"  {item_id}  [metadados ausentes]")
+            continue
+
+        try:
+            with meta_path.open("r", encoding="utf-8") as f:
+                meta = json.load(f)
+        except json.JSONDecodeError:
+            print(f"  {item_id}  [erro ao ler metadados]")
+            continue
+        except OSError:
+            print(f"  {item_id}  [erro ao ler metadados]")
+            continue
+
+        source = meta.get("source") if isinstance(meta.get("source"), dict) else {}
+        snapshot = meta.get("snapshot") if isinstance(meta.get("snapshot"), dict) else {}
+        kind_value = meta.get("kind")
+        kind_label = {
+            "file": "arquivo",
+            "text": "texto",
+            "output": "saida",
+        }.get(kind_value, kind_value if isinstance(kind_value, str) else "<desconhecido>")
+
+        origin = "[origem ausente]"
+        if kind_value == "file":
+            path_rel = source.get("path_rel")
+            if isinstance(path_rel, str) and path_rel.strip():
+                origin = path_rel
+                if not origin.startswith("/") and not origin.startswith("."):
+                    origin = f"./{origin}"
+        elif kind_value == "text":
+            origin = "[texto]"
+        elif kind_value == "output":
+            run_id = source.get("run_id") if isinstance(source, dict) else None
+            origin = f"saída do run {run_id}" if run_id else "[output]"
+
+        size_value = source.get("size") if isinstance(source, dict) else None
+        if size_value is None and snapshot.get("blob"):
+            blob_candidate = blobs_dir / Path(str(snapshot.get("blob"))).name
+            try:
+                size_value = blob_candidate.stat().st_size
+            except OSError:
+                size_value = None
+
+        digest_value = snapshot.get("digest") or (source.get("digest") if isinstance(source, dict) else None)
+        size_label = format_size(size_value if isinstance(size_value, int) else None)
+        digest_label = short_digest(digest_value if isinstance(digest_value, str) else None)
+
+        print(f"  {item_id}  {kind_label}  {origin}  ({size_label}, SHA: {digest_label})")
+
+    return 0
+
+
+def context_remove(item_id: str) -> int:
+    try:
+        session_id, session_dir, session_data = require_active_session()
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    if not item_id or not item_id.strip():
+        print("Erro: ID do item é obrigatório.", file=sys.stderr)
+        return 1
+
+    item_id = item_id.strip()
+    if not re.fullmatch(r"ctx-\d{4}", item_id):
+        print(f"Erro: ID inválido: {item_id}. Use o formato ctx-0001.", file=sys.stderr)
+        return 1
+
+    context_dir = session_dir / "context"
+    active_path = context_dir / "active.json"
+    items_dir = context_dir / "items"
+
+    active_data = read_json(active_path, {"items": []})
+    items_list_raw = active_data.get("items") if isinstance(active_data, dict) else []
+    items_list = items_list_raw if isinstance(items_list_raw, list) else []
+
+    item_path = items_dir / f"{item_id}.json"
+    item_data = read_json(item_path, {}) if item_path.exists() else {}
+    if item_data.get("state") == "removed":
+        print(f"Erro: Item {item_id} já foi removido anteriormente.", file=sys.stderr)
+        return 1
+
+    if not items_list or item_id not in items_list:
+        print(f"Erro: Item {item_id} não encontrado no contexto ativo.", file=sys.stderr)
+        return 1
+
+    if not item_path.exists():
+        print(f"Erro: Metadados do item {item_id} não encontrados.", file=sys.stderr)
+        return 1
+
+    now = iso_now()
+    item_data["state"] = "removed"
+    item_data["removed_at"] = now
+    write_json(item_path, item_data)
+
+    try:
+        items_list.remove(item_id)
+    except ValueError:
+        pass
+    active_data["items"] = items_list
+    write_json(active_path, active_data)
+
+    session_data["updated_at"] = now
+    if not items_list:
+        session_data["state"] = "iniciada"
+    write_json(session_dir / "session.json", session_data)
+
+    print(f"Item {item_id} removido. Restam {len(items_list)} itens no contexto.")
+    return 0
+
+
+def load_active_context(session_dir: Path) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[str]]:
+    context_dir = session_dir / "context"
+    active_path = context_dir / "active.json"
+    items_dir = context_dir / "items"
+
+    active_data = read_json(active_path, {"items": []})
+    raw_items = active_data.get("items") if isinstance(active_data, dict) else []
+    item_ids = raw_items if isinstance(raw_items, list) else []
+
+    context_entries: List[Dict[str, Any]] = []
+    sent_entries: List[Dict[str, Any]] = []
+    errors: List[str] = []
+
+    for raw_id in item_ids:
+        item_id = raw_id if isinstance(raw_id, str) else str(raw_id)
+        meta_path = items_dir / f"{item_id}.json"
+        if not meta_path.exists():
+            errors.append(f"Metadados do item {item_id} não encontrados.")
+            continue
+
+        meta = read_json(meta_path, {})
+        if not meta:
+            errors.append(f"Metadados do item {item_id} estão vazios ou corrompidos.")
+            continue
+        if meta.get("state") == "removed":
+            errors.append(f"Item {item_id} foi removido e não pode ser usado no contexto.")
+            continue
+
+        snapshot = meta.get("snapshot") if isinstance(meta.get("snapshot"), dict) else {}
+        source = meta.get("source") if isinstance(meta.get("source"), dict) else {}
+        snapshot_blob = snapshot.get("blob")
+        if not isinstance(snapshot_blob, str) or not snapshot_blob.strip():
+            snapshot_blob = f"../blobs/{item_id}.txt"
+        blob_path = (items_dir / snapshot_blob).resolve()
+
+        try:
+            blob_bytes = blob_path.read_bytes()
+        except OSError:
+            errors.append(f"Não foi possível ler o blob do item {item_id}: {blob_path}")
+            continue
+
+        digest_value = snapshot.get("digest")
+        if not isinstance(digest_value, str) or not digest_value.strip():
+            digest_value = hashlib.sha256(blob_bytes).hexdigest()
+
+        try:
+            blob_text = blob_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            blob_text = blob_bytes.decode("utf-8", errors="replace")
+
+        kind_value = meta.get("kind") if isinstance(meta.get("kind"), str) else "desconhecido"
+        path_rel = source.get("path_rel") if isinstance(source.get("path_rel"), str) else None
+
+        label = "[contexto]"
+        if kind_value == "file":
+            label = path_rel or "arquivo"
+        elif kind_value == "text":
+            label = "[texto]"
+        elif kind_value == "output":
+            label = "output"
+
+        context_entries.append(
+            {
+                "id": item_id,
+                "kind": kind_value,
+                "label": label,
+                "content": blob_text,
+                "digest": digest_value,
+                "snapshot_blob": snapshot_blob,
+                "path_rel": path_rel,
+            }
+        )
+
+        sent_entry: Dict[str, Any] = {
+            "id": item_id,
+            "kind": kind_value,
+            "snapshot_blob": snapshot_blob,
+            "digest": digest_value,
+        }
+        if path_rel:
+            sent_entry["path_rel"] = path_rel
+        sent_entries.append(sent_entry)
+
+    return context_entries, sent_entries, errors

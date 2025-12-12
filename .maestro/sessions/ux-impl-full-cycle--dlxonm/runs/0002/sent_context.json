@@ -1,0 +1,37 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "a930878cc158a2b174e499615344e9a6d529ae2221ec14a5de23a728323df7d6",
+    "path_rel": "src/maestro/tools.py"
+  },
+  {
+    "id": "ctx-0002",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0002.txt",
+    "digest": "064dc9f43e0b06233f1b6f1d06e2c916e7e71db620d594a226baab9f18d37355",
+    "path_rel": "src/maestro/context.py"
+  },
+  {
+    "id": "ctx-0003",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0003.txt",
+    "digest": "0378f8b42e08f510b5365f3e9e180ff350ef983b88f2e03784ee44587ec6255c",
+    "path_rel": "src/maestro/utils.py"
+  },
+  {
+    "id": "ctx-0004",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0004.txt",
+    "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07",
+    "path_rel": "docs/logs/2025-12-12_185200__QWEN__refactor-modularization_REFINEMENT.md"
+  },
+  {
+    "id": "ctx-0005",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0005.txt",
+    "digest": "bf8f005ca281a8009ca107532320e7e87fd326affc92a11bcc6a8228490b66e6",
+    "path_rel": "docs/logs/2025-12-12_191900__CODEX__ux-refinement_IMPLEMENTATION.md"
+  }
+]

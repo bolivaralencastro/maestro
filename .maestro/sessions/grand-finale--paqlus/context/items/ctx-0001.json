@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0001",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/STATUS.md",
+    "added_at": "2025-12-12T22:34:12.351483+00:00",
+    "digest": "25a44588b2849c906d164805baae9b306e5a83bc5ebf6b4dc95767dd80eeebc8",
+    "mtime": "2025-12-12T22:30:05.546016+00:00",
+    "size": 1176
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0001.txt",
+    "digest": "25a44588b2849c906d164805baae9b306e5a83bc5ebf6b4dc95767dd80eeebc8"
+  },
+  "state": "active"
+}

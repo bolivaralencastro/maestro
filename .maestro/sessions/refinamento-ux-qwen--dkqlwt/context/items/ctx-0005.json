@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0005",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/logs/2025-12-12_184700__GEMINI__refactor-modularization_REVIEW.md",
+    "added_at": "2025-12-12T21:53:27.525646+00:00",
+    "digest": "58e080f138a0117405f31bcdaeafe289fff4ed7cd3411af398f38a97fd23b9c8",
+    "mtime": "2025-12-12T21:51:31.282890+00:00",
+    "size": 3502
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0005.txt",
+    "digest": "58e080f138a0117405f31bcdaeafe289fff4ed7cd3411af398f38a97fd23b9c8"
+  },
+  "state": "active"
+}

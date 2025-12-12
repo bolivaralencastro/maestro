@@ -1,0 +1,9 @@
+[
+  {
+    "id": "ctx-0001",
+    "kind": "file",
+    "snapshot_blob": "../blobs/ctx-0001.txt",
+    "digest": "d3b77f66ebb7f8dc22b7f38b01fa0e8aa81fb00c86e790024730ac9cac51e565",
+    "path_rel": "bin/maestro"
+  }
+]

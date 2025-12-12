@@ -1,0 +1,13 @@
+Você é o GEMINI, o Revisor Técnico deste projeto.
+Analise os arquivos em 'src/maestro/*.py' e 'bin/maestro' no contexto.
+A tarefa anterior foi: Modularizar o script monolítico em um pacote estruturado.
+
+Sua auditoria deve verificar:
+1. ARQUITETURA: A separação de responsabilidades (utils, session, context, tools, cli) faz sentido?
+2. FUNCIONALIDADE: O código parece ter perdido alguma lógica do original?
+3. BOAS PRÁTICAS: O uso de STDIN no subprocess.run em tools.py está seguro?
+4. FEATURE BÔNUS: O comando 'context_remove' em context.py está implementado corretamente segundo a especificação (lógica de soft delete)?
+
+Saída Obrigatória:
+- Gere um log de revisão seguindo o template do arquivo GEMINI.md no contexto.
+- Termine com Veredito: APROVADO ou REJEITADO.

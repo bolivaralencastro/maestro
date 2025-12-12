@@ -1,0 +1,9 @@
+Você é um especialista em Python. Analise o arquivo bin/maestro no contexto. Sua tarefa é MODULARIZAR este script monolítico em um pacote Python estruturado.
+1. Crie os arquivos em src/maestro/:
+   - utils.py (read_json, write_json, etc)
+   - session.py (start, list, status)
+   - context.py (add, list, remove)
+   - tools.py (use, run)
+   - cli.py (main e entry point)
+2. Gere o código completo para cada um desses arquivos.
+3. Gere o novo bin/maestro que importa src.maestro.cli.

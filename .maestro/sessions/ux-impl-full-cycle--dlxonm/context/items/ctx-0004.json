@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0004",
+  "kind": "file",
+  "source": {
+    "path_rel": "docs/logs/2025-12-12_185200__QWEN__refactor-modularization_REFINEMENT.md",
+    "added_at": "2025-12-12T22:13:10.626258+00:00",
+    "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07",
+    "mtime": "2025-12-12T21:55:24.282985+00:00",
+    "size": 1689
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0004.txt",
+    "digest": "da6ea8e6f19d49107c51bec1e3bba9edcb6c113fea5332a9d8ad9c28cede0c07"
+  },
+  "state": "active"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "ctx-0001",
+  "kind": "file",
+  "source": {
+    "path_rel": "MISTRAL.md",
+    "added_at": "2025-12-12T22:01:20.117333+00:00",
+    "digest": "e4a6074b3828942879091ca0dbca24d9ce31dbf38cc7a2a901f9cc5dde9c4055",
+    "mtime": "2025-12-12T19:32:29.121039+00:00",
+    "size": 694
+  },
+  "snapshot": {
+    "blob": "../blobs/ctx-0001.txt",
+    "digest": "e4a6074b3828942879091ca0dbca24d9ce31dbf38cc7a2a901f9cc5dde9c4055"
+  },
+  "state": "active"
+}

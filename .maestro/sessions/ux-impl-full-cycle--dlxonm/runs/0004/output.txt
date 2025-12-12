@@ -1,0 +1,73 @@
+# EVOLUTION.md — Histórico do Projeto Maestro
+
+**Nota:** Para status atual do projeto, consulte [STATUS.md](docs/STATUS.md). Para próximas tarefas e backlog, consulte [BACKLOG.md](docs/BACKLOG.md).
+
+Este documento consolida a evolução histórica do projeto Maestro, baseado nos logs de desenvolvimento encontrados em `docs/logs`.
+
+## Linha do Tempo
+
+### 2025-12-12 19:19 — Implementação de Melhorias de UX
+
+**Arquivo:** `docs/logs/2025-12-12_191900__CODEX__ux-refinement_IMPLEMENTATION.md`
+
+**O que foi feito:**
+- **Spinner de Execução:** Implementação de um spinner animado (`|/-\`) em `src/maestro/tools.py` utilizando `threading.Thread` para fornecer feedback visual durante a execução de ferramentas externas. O spinner é executado em paralelo ao `subprocess.run` e é limpo corretamente após a conclusão do processo.
+- **Feedback de Contexto:** Melhoria na mensagem de sucesso do comando `context remove` em `src/maestro/context.py` para incluir a contagem de itens restantes no contexto (`Restam X itens no contexto.`).
+
+**Objetivo:** Melhorar a experiência do usuário (UX) da CLI, fornecendo feedback visual durante operações longas e informações claras sobre o estado do contexto após operações destrutivas.
+
+**Próximos passos:** Revisão pela Gemini para validação técnica e segurança de threads.
+
+---
+
+### 2025-12-12 19:25 — Revisão das Melhorias de UX
+
+**Arquivo:** `docs/logs/2025-12-12_192500__GEMINI__ux-refinement_REVIEW.md`
+
+**Verdito:** ✅ APROVADO
+
+**Análise:**
+- **Spinner de Execução:** A implementação do spinner é tecnicamente sólida e segura. O uso de `threading.Event` para sinalizar o término da execução e a limpeza da linha do spinner no bloco `finally` garantem uma transição limpa e sem artefatos visuais no terminal. O uso de `daemon=True` é apropriado e seguro neste contexto.
+- **Feedback de Contexto:** A mensagem de sucesso foi alterada corretamente para incluir a contagem de itens restantes, fornecendo o feedback de UX aprimorado que foi solicitado.
+
+**Conclusão:** A implementação atende plenamente aos requisitos de refinamento de UX e é tecnicamente segura.
+
+**Próximos passos:** Validação pela Qwen para conformidade com os requisitos de UX.
+
+---
+
+### 2025-12-12 19:30 — Validação das Melhorias de UX
+
+**Arquivo:** `docs/logs/2025-12-12_193000__QWEN__ux-refinement_VALIDATION.md`
+
+**Verdito:** ✅ ENCERRADO
+
+**Análise:**
+- **Spinner de Execução:** A implementação atende perfeitamente à demanda de eliminar a sensação de travamento durante a execução de ferramentas externas, fornecendo feedback tátil de que o sistema está vivo.
+- **Feedback de Contexto:** A mensagem dinâmica pós-remoção elimina a ambiguidade sobre o estado do contexto após operações destrutivas.
+
+**Conclusão:** As melhorias solicitadas no ciclo anterior foram implementadas com precisão e validadas tecnicamente pelo Gemini. A experiência de uso da CLI agora é mais responsiva e informativa.
+
+**Próximos passos:** Nenhuma ação imediata necessária. O ciclo de UX está encerrado.
+
+---
+
+## Resumo da Evolução
+
+O projeto Maestro evoluiu para incluir melhorias significativas na experiência do usuário (UX) da CLI:
+
+1. **Spinner de Execução:** Implementação de um spinner animado para fornecer feedback visual durante a execução de ferramentas externas, eliminando a sensação de travamento.
+2. **Feedback de Contexto:** Melhoria na mensagem de sucesso do comando `context remove` para incluir a contagem de itens restantes no contexto, fornecendo informações claras sobre o estado do contexto após operações destrutivas.
+3. **Validação Completa:** As melhorias foram validadas por todos os três agentes (Codex, Gemini, Qwen), garantindo conformidade técnica e de UX.
+
+## Lições Aprendidas
+
+- **Feedback Visual:** A implementação de feedback visual (spinner) é crucial para melhorar a experiência do usuário durante operações longas.
+- **Informações Claras:** Fornecer informações claras sobre o estado do sistema após operações destrutivas é essencial para uma boa experiência do usuário.
+- **Colaboração:** A revisão e validação por diferentes agentes (Codex, Gemini, Qwen) garantem a qualidade e conformidade das implementações.
+
+## Status do Ciclo de UX
+
+**ENCERRADO**
+
+O ciclo de refinamento de UX foi concluído com sucesso, atendendo a todos os requisitos e melhorando significativamente a experiência do usuário da CLI.

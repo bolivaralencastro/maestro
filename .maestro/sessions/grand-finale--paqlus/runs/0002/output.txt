@@ -1,0 +1,1 @@
+GEMINI: APROVADO - Arquitetura modular é estável; threading para UI não compromete o legado, mas exige manutenção cuidadosa.
